@@ -831,10 +831,10 @@ OOVPATable DSound_5344[] = {
 	REGISTER_OOVPA(CMcpxAPU_SynchPlayback, 5233, XREF),
 	REGISTER_OOVPA(CDirectSound_SynchPlayback, 5344, XREF),
 	REGISTER_OOVPA(IDirectSound_SynchPlayback, 5233, PATCH),
-	REGISTER_OOVPA(CMcpxBuffer_Pause, 4928, XREF),
+	REGISTER_OOVPA(CMcpxBuffer_Pause, 4831, XREF),
 	REGISTER_OOVPA(CDirectSoundBuffer_Pause, 4928, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_Pause, 4928, PATCH),
-	REGISTER_OOVPA(CMcpxStream_Pause, 4928, XREF),
+	REGISTER_OOVPA(CMcpxStream_Pause, 4831, XREF),
 	REGISTER_OOVPA(CDirectSoundStream_Pause, 4361, PATCH),
 	REGISTER_OOVPA(CDirectSound_SetVelocity, 5344, XREF),
 	REGISTER_OOVPA(IDirectSound_SetVelocity, 3936, PATCH),
@@ -870,7 +870,7 @@ OOVPATable DSound_5344[] = {
 	REGISTER_OOVPA(CMcpxBuffer_GetCurrentPosition, 4134, XREF),
 	REGISTER_OOVPA(CDirectSoundBuffer_GetCurrentPosition, 4134, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_GetCurrentPosition, 3936, PATCH),
-	REGISTER_OOVPA(CMcpxBuffer_Play, 4928, XREF),
+	REGISTER_OOVPA(CMcpxBuffer_Play, 4831, XREF),
 	REGISTER_OOVPA(CDirectSoundBuffer_Play, 4361, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_Play, 4361, PATCH),
 	REGISTER_OOVPA(CDirectSoundStream_FlushEx, 5233, XREF),
@@ -984,6 +984,8 @@ OOVPATable DSound_5344[] = {
 	REGISTER_OOVPA(CDirectSoundBuffer_SetConeOrientation, 4134, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_SetConeOrientation, 4134, PATCH),
 	REGISTER_OOVPA(CDirectSoundStream_SetConeOrientation, 4134, PATCH),
+	REGISTER_OOVPA(CDirectSoundBuffer_SetNotificationPositions, 4627, XREF),
+	REGISTER_OOVPA(IDirectSoundBuffer_SetNotificationPositions, 4627, PATCH)
 };
 
 // ******************************************************************

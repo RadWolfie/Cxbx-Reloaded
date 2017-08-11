@@ -53,7 +53,7 @@ OOVPA_END;
 // ******************************************************************
 // * IDirectSound8_EnableHeadphones
 // ******************************************************************
-OOVPA_XREF(IDirectSound8_EnableHeadphones, 5233, 8,
+OOVPA_XREF(IDirectSound_EnableHeadphones, 5233, 8,
 
     XRefNoSaveIndex,
     XRefOne)
@@ -296,7 +296,7 @@ OOVPA_END;
 // ******************************************************************
 // * CDirectSoundStream::SetFrequency
 // ******************************************************************
-OOVPA_XREF(CDirectSoundStream_SetFrequency, 5233, 8,
+OOVPA_XREF(CDirectSoundStream_SetFrequency, 5233, 11,
 
     XRefNoSaveIndex,
     XRefOne)
@@ -304,11 +304,20 @@ OOVPA_XREF(CDirectSoundStream_SetFrequency, 5233, 8,
         XREF_ENTRY( 0x36, XREF_DSBUFFERSETFREQUENCYB ),
 
         { 0x0E, 0xB6 },
+        // je XXXXXXXX + 0x0B
+        { 0x14, 0x74 },
         { 0x15, 0x0B },
+        // jmp XXXXXXXX + 0x26
+        { 0x26, 0xEB },
         { 0x27, 0x26 },
+
         { 0x2A, 0x24 },
+        // je XXXXXXXX + 0x0B
         { 0x3E, 0x74 },
-        { 0x4D, 0x5F },
+        { 0x3F, 0x0B },
+
+        // ret 8
+        { 0x4F, 0xC2 },
         { 0x50, 0x08 },
 OOVPA_END;
 
@@ -360,7 +369,7 @@ OOVPATable DSound_5233[] = {
 	REGISTER_OOVPA(CMcpxAPU_SynchPlayback, 5233, XREF),
 	REGISTER_OOVPA(CDirectSound_SynchPlayback, 5233, XREF),
 	REGISTER_OOVPA(IDirectSound_SynchPlayback, 5233, PATCH),
-	REGISTER_OOVPA(CMcpxStream_Pause, 4928, XREF),
+	REGISTER_OOVPA(CMcpxStream_Pause, 4831, XREF),
 	REGISTER_OOVPA(CDirectSoundStream_Pause, 4361, PATCH),
 	REGISTER_OOVPA(CDirectSound_SetI3DL2Listener, 4134, XREF),
 	REGISTER_OOVPA(IDirectSound_SetI3DL2Listener, 4134, PATCH),
@@ -399,13 +408,13 @@ OOVPATable DSound_5233[] = {
 	REGISTER_OOVPA(CDirectSoundBuffer_GetStatus, 4134, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_GetStatus, 4134, PATCH),
 	REGISTER_OOVPA(CMcpxBuffer_GetCurrentPosition, 4134, XREF),
-	REGISTER_OOVPA(CMcpxBuffer_Play, 4928, XREF),
+	REGISTER_OOVPA(CMcpxBuffer_Play, 4831, XREF),
 	REGISTER_OOVPA(CDirectSoundBuffer_Play, 4361, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_Play, 4361, PATCH),
 	REGISTER_OOVPA(CDirectSoundStream_FlushEx, 5233, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_StopEx, 5233, PATCH),
 	REGISTER_OOVPA(CDirectSound_EnableHeadphones, 5233, XREF),
-	REGISTER_OOVPA(IDirectSound8_EnableHeadphones, 5233, PATCH),
+	REGISTER_OOVPA(IDirectSound_EnableHeadphones, 5233, PATCH),
 	REGISTER_OOVPA(IDirectSound_DownloadEffectsImage, 3936, PATCH),
 	REGISTER_OOVPA(IDirectSound_SetOrientation, 3936, PATCH),
 	REGISTER_OOVPA(CDirectSound_SetDistanceFactorA, 4627, XREF),

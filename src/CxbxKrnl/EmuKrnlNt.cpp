@@ -385,6 +385,26 @@ XBSYSAPI EXPORTNUM(190) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtCreateFile
 		0);
 }
 
+XBSYSAPI EXPORTNUM(191) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtCreateIoCompletion
+(
+	OUT PHANDLE IoCompletionHandle,
+	IN ACCESS_MASK DesiredAccess,
+	IN POBJECT_ATTRIBUTES ObjectAttributes,
+	IN ULONG Count
+)
+{
+	LOG_FUNC_BEGIN
+		LOG_FUNC_ARG_OUT(IoCompletionHandle)
+		LOG_FUNC_ARG(DesiredAccess)
+		LOG_FUNC_ARG(ObjectAttributes)
+		LOG_FUNC_ARG(Count)
+	LOG_FUNC_END;
+
+	LOG_UNIMPLEMENTED();
+
+	RETURN(STATUS_NOT_IMPLEMENTED);
+}
+
 // ******************************************************************
 // * 0x00C0 - NtCreateMutant()
 // ******************************************************************
@@ -1033,9 +1053,15 @@ XBSYSAPI EXPORTNUM(207) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtQueryDirectoryFile
 
 	// initialize FileMask
 	{
-		if (FileMask != 0)
+		if (FileMask != 0) {
+			// Xbox expects directories to be listed when *.* is passed
+			if (strncmp(FileMask->Buffer, "*.*", FileMask->Length) == 0) {
+				FileMask->Length = 1;
+				FileMask->Buffer = "*";
+			}
+
 			mbstowcs(/*Dest=*/wszObjectName, /*Source=*/FileMask->Buffer, /*MaxCount=*/MAX_PATH);
-		else
+		} else
 			mbstowcs(/*Dest=*/wszObjectName, /*Source=*/"", /*MaxCount=*/MAX_PATH);
 
 		NtDll::RtlInitUnicodeString(&NtFileMask, wszObjectName);
@@ -1422,30 +1448,82 @@ XBSYSAPI EXPORTNUM(218) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtQueryVolumeInformat
 		LOG_FUNC_ARG(FileInformationClass)
 		LOG_FUNC_END;
 
+	// Get the required size for the host buffer
+	// This may differ than the xbox buffer size so we also need to handle conversions!
+	ULONG HostBufferSize = 0;
+	switch ((DWORD)FileInformationClass) {
+		case FileFsVolumeInformation:
+			// Reserve a large enough buffer for the file information 
+			// including the variable length path field
+			HostBufferSize = sizeof(NtDll::FILE_FS_VOLUME_INFORMATION) + MAX_PATH;
+			break;
+		case FileFsLabelInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_LABEL_INFORMATION);
+			break;
+		case FileFsSizeInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_SIZE_INFORMATION);
+			break;
+		case FileFsDeviceInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_DEVICE_INFORMATION);
+			break;
+		case FileFsAttributeInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_ATTRIBUTE_INFORMATION);
+			break;
+		case FileFsFullSizeInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_FULL_SIZE_INFORMATION);
+			break;
+		case FileFsObjectIdInformation:
+			HostBufferSize = sizeof(NtDll::FILE_FS_OBJECTID_INFORMATION);
+			break;
+	}
+
+	PVOID NativeFileInformation = _aligned_malloc(HostBufferSize, 8);
+
 	NTSTATUS ret = NtDll::NtQueryVolumeInformationFile(
 		FileHandle,
 		(NtDll::PIO_STATUS_BLOCK)IoStatusBlock,
-		(NtDll::PFILE_FS_SIZE_INFORMATION)FileInformation, Length,
+		(NtDll::PFILE_FS_SIZE_INFORMATION)NativeFileInformation, HostBufferSize,
 		(NtDll::FS_INFORMATION_CLASS)FileInformationClass);
 
-	if (ret == STATUS_SUCCESS)
-	{
-		// NOTE: TODO: Dynamically fill in, or allow configuration?
-		if (FileInformationClass == FileFsSizeInformation)
-		{
-			FILE_FS_SIZE_INFORMATION *SizeInfo = (FILE_FS_SIZE_INFORMATION*)FileInformation;
+	// Convert Xbox NativeFileInformation to FileInformation
+	if (ret == STATUS_SUCCESS) {
+		switch ((DWORD)FileInformationClass) {
+				case FileFsSizeInformation: {
+					PFILE_FS_SIZE_INFORMATION XboxSizeInfo = (PFILE_FS_SIZE_INFORMATION)FileInformation;
+					NtDll::PFILE_FS_SIZE_INFORMATION HostSizeInfo = (NtDll::PFILE_FS_SIZE_INFORMATION)NativeFileInformation;
 
-			SizeInfo->TotalAllocationUnits.QuadPart = 0x4C468;
-			SizeInfo->AvailableAllocationUnits.QuadPart = 0x2F125;
-			SizeInfo->SectorsPerAllocationUnit = 32;
-			SizeInfo->BytesPerSector = 512;
+					// TODO: Convert Total/Available to 512/32 based amounts
+					XboxSizeInfo->TotalAllocationUnits.QuadPart = HostSizeInfo->TotalAllocationUnits.QuadPart;
+					XboxSizeInfo->AvailableAllocationUnits.QuadPart = HostSizeInfo->AvailableAllocationUnits.QuadPart;
+					XboxSizeInfo->SectorsPerAllocationUnit = 32;
+					XboxSizeInfo->BytesPerSector = 512;
+				}
+				break;
+				case FileFsVolumeInformation: {
+					PFILE_FS_VOLUME_INFORMATION XboxVolumeInfo = (PFILE_FS_VOLUME_INFORMATION)FileInformation;
+					NtDll::PFILE_FS_VOLUME_INFORMATION HostVolumeInfo = (NtDll::PFILE_FS_VOLUME_INFORMATION)NativeFileInformation;
+
+					// Most options can just be directly copied to the Xbox version, only the strings differ
+					XboxVolumeInfo->VolumeCreationTime.QuadPart = HostVolumeInfo->VolumeCreationTime.QuadPart;
+					XboxVolumeInfo->VolumeSerialNumber = HostVolumeInfo->VolumeSerialNumber;
+					XboxVolumeInfo->VolumeLabelLength = HostVolumeInfo->VolumeLabelLength;
+					XboxVolumeInfo->SupportsObjects = HostVolumeInfo->SupportsObjects;
+
+					// Convert strings to the Xbox format 
+					wcstombs(XboxVolumeInfo->VolumeLabel, HostVolumeInfo->VolumeLabel, HostVolumeInfo->VolumeLabelLength);
+				}
+				break;
+			default:
+				// For all other types, just do a memcpy and hope for the best!
+				EmuWarning("NtQueryVolumeInformationFile: Unknown FileInformationClass");
+				memcpy_s(FileInformation, Length, NativeFileInformation, HostBufferSize);
+				break;
 		}
-		else
-			LOG_UNIMPLEMENTED();
-
 	}
-	else
-	{
+
+	_aligned_free(NativeFileInformation);
+
+	if (FAILED(ret)) {
 		EmuWarning("NtQueryVolumeInformationFile failed! (%s)\n", NtStatusToString(ret));
 	}
 
@@ -1569,7 +1647,7 @@ XBSYSAPI EXPORTNUM(224) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtResumeThread
 
 	// TODO : Once we do our own thread-switching, implement NtResumeThread using KetResumeThread
 
-	Sleep(10);
+	//Sleep(10);
 
 	RETURN(ret);
 }
@@ -1676,7 +1754,7 @@ XBSYSAPI EXPORTNUM(228) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtSetSystemTime
 // ******************************************************************
 // * 0x00E5 - NtSetTimerEx()
 // ******************************************************************
-XBSYSAPI EXPORTNUM(229) xboxkrnl::NTSTATUS xboxkrnl::NtSetTimerEx
+XBSYSAPI EXPORTNUM(229) xboxkrnl::NTSTATUS NTAPI xboxkrnl::NtSetTimerEx
 (
 	IN HANDLE TimerHandle,
 	IN PLARGE_INTEGER DueTime,
