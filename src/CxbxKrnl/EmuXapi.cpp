@@ -676,7 +676,7 @@ VOID WINAPI XTL::EMUPATCH(XapiThreadStartup)
     DWORD dwDummy2
 )
 {
-	FUNC_EXPORTS
+	//FUNC_EXPORTS
 
 	LOG_FUNC_BEGIN
 		LOG_FUNC_ARG(dwDummy1)
@@ -711,7 +711,7 @@ VOID WINAPI XTL::EMUPATCH(XRegisterThreadNotifyRoutine)
     BOOL                    fRegister
 )
 {
-	FUNC_EXPORTS
+	//FUNC_EXPORTS
 
 	LOG_FUNC_BEGIN
 		LOG_FUNC_ARG(pThreadNotification)
@@ -939,6 +939,7 @@ DWORD WINAPI XTL::EMUPATCH(QueueUserAPC)
 	RETURN(dwRet);
 }
 
+#if 0 // Handled by WaitForSingleObject
 // ******************************************************************
 // * patch: GetOverlappedResult
 // ******************************************************************
@@ -950,7 +951,7 @@ BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 	BOOL			bWait
 )
 {
-	FUNC_EXPORTS
+	//FUNC_EXPORTS
 
 	LOG_FUNC_BEGIN
 		LOG_FUNC_ARG(hFile)
@@ -966,6 +967,7 @@ BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 
 	RETURN(bRet);
 }
+#endif
 
 // ******************************************************************
 // * patch: XLaunchNewImageA

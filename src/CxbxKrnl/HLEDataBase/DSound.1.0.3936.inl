@@ -204,6 +204,11 @@ OOVPA_XREF(CDirectSound_CreateSoundBuffer, 3936, 16,
     XREF_DSCREATESOUNDBUFFER,
     XRefZero)
 
+    /*TODO: Need verification offset 0x00 is push ebp or different op code.
+      This is needed to avoid false detection for 4039 and later XDK version.
+        // CDirectSound_CreateSoundBuffer+0x00 : push ebp
+        { 0x00, 0x55 },
+    */
         // CDirectSound_CreateSoundBuffer+0x2D : and esi, 0x7FF8FFF2
         { 0x2D, 0x81 }, // (Offset,Value)-Pair #1
         { 0x2E, 0xE6 }, // (Offset,Value)-Pair #2
@@ -230,30 +235,30 @@ OOVPA_XREF(CDirectSound_CreateSoundBuffer, 3936, 16,
 OOVPA_END;
 
 // ******************************************************************
-// * IDirectSound_CreateBuffer
+// * IDirectSound_CreateSoundBuffer
 // ******************************************************************
-OOVPA_XREF(IDirectSound_CreateBuffer, 3936, 10,
+OOVPA_XREF(IDirectSound_CreateSoundBuffer, 3936, 10,
 
     XRefNoSaveIndex,
     XRefOne)
 
     // TODO: tidy up the xref names (are probably not accurate)
 
-        // IDirectSound_CreateBuffer+0x1D : call [CDirectSound::CreateSoundStream]
+        // IDirectSound_CreateSoundBuffer+0x1D : call [CDirectSound::CreateSoundBuffer]
         XREF_ENTRY( 0x1D, XREF_DSCREATESOUNDBUFFER ), // (Offset,Value)-Pair #1
 
-        // IDirectSound_CreateBuffer+0x04 : mov eax, [esp+0x08]
+        // IDirectSound_CreateSoundBuffer+0x04 : mov eax, [esp+0x08]
         { 0x04, 0x8B }, // (Offset,Value)-Pair #2
         { 0x05, 0x44 }, // (Offset,Value)-Pair #3
         { 0x06, 0x24 }, // (Offset,Value)-Pair #4
         { 0x07, 0x08 }, // (Offset,Value)-Pair #5
 
-        // IDirectSound_CreateBuffer+0x12 : and eax, 0xFFFFFFF8
+        // IDirectSound_CreateSoundBuffer+0x12 : and eax, 0xFFFFFFF8
         { 0x12, 0x83 }, // (Offset,Value)-Pair #6
         { 0x13, 0xC0 }, // (Offset,Value)-Pair #7
         { 0x14, 0xF8 }, // (Offset,Value)-Pair #8
 
-        // IDirectSound_CreateBuffer+0x21 : retn 0x10
+        // IDirectSound_CreateSoundBuffer+0x21 : retn 0x10
         { 0x21, 0xC2 }, // (Offset,Value)-Pair #9
         { 0x22, 0x10 }, // (Offset,Value)-Pair #10
 OOVPA_END;
@@ -3077,6 +3082,7 @@ OOVPA_XREF(CDirectSound_SetAllParametersA, 3936, 10,
         { 0x49, 0x0C }, // (Offset,Value)-Pair #10
 OOVPA_END;
 
+//TODO: Which one is accurate for 3936 and older version? IDirectSound8_SetAllParameters or IDirectSound_SetAllParameters?
 // ******************************************************************
 // * IDirectSound8_SetAllParameters
 // ******************************************************************
@@ -3931,6 +3937,125 @@ OOVPA_NO_XREF(CDirectSoundStream_Pause, 3936, 6)
         { 0x11, 0x08 },
 OOVPA_END;
 
+//TODO: Need another OOVPA reference since Halo has a match for CDirectSoundStream_SetConeOrientation signature.
+// ******************************************************************
+// * CDirectSoundBuffer::SetConeOrientation
+// ******************************************************************
+OOVPA_XREF(CDirectSoundBuffer_SetConeOrientation, 3936, 10,
+    XREF_DSBUFFERSETCONEORIENTATION,
+    XRefZero)
+
+        // CDirectSoundBuffer_SetConeOrientation+0x1A : fstp [esp+8h]
+        { 0x0C, 0xD9 },
+        { 0x0D, 0x5C },
+        { 0x0E, 0x24 },
+        { 0x0F, 0x08 },
+
+        // CDirectSoundBuffer_SetConeOrientation+0x1A : fstp [esp]
+        { 0x1A, 0xD9 },
+        { 0x1B, 0x1C },
+        { 0x1C, 0x24 },
+
+        // CDirectSoundBuffer_SetConeOrientation+0x26 : ret 14h
+        { 0x26, 0xC2 },
+        { 0x27, 0x14 },
+        { 0x28, 0x00 },
+OOVPA_END;
+
+// ******************************************************************
+// * IDirectSoundBuffer_SetConeOrientation
+// ******************************************************************
+OOVPA_XREF(IDirectSoundBuffer_SetConeOrientation, 3936, 9,
+
+           XRefNoSaveIndex,
+           XRefOne)
+
+    // IDirectSoundBuffer_SetConeOrientation+0x2C : call [CDirectSoundBuffer::SetConeOrientation]
+    XREF_ENTRY(0x2D, XREF_DSBUFFERSETCONEORIENTATION),
+
+    // IDirectSoundBuffer_SetConeOrientation+0x06 : fld [ebp+arg_C]
+    { 0x06, 0xD9 },
+    { 0x07, 0x45 },
+    { 0x08, 0x14 },
+
+    // IDirectSoundBuffer_SetConeOrientation+0x28 : fstp [esp+10h+var_10]
+    { 0x28, 0xD9 },
+    { 0x29, 0x1C },
+    { 0x2A, 0x24 },
+
+    // IDirectSoundBuffer_SetConeOrientation+0x32 : retn 14h
+    { 0x33, 0x14 },
+    { 0x34, 0x00 }
+OOVPA_END;
+
+//TODO: Need another OOVPA reference since Halo has a match for CDirectSoundStream_SetConeOutsideVolume signature.
+// ******************************************************************
+// * CDirectSoundBuffer::SetConeOutsideVolume
+// ******************************************************************
+OOVPA_XREF(CDirectSoundBuffer_SetConeOutsideVolume, 3936, 11,
+
+           XREF_DSBUFFERSETCONEOUTSIDEVOLUME,
+           XRefZero)
+
+    // CDirectSoundBuffer_SetConeOutsideVolume+0x09 : mov eax,dword ptr [esp+14h]  
+    { 0x09, 0x8B },
+    { 0x0A, 0x44 },
+    { 0x0B, 0x24 },
+    { 0x0C, 0x14 },
+
+    // CDirectSoundBuffer_SetConeOutsideVolume+0x17 : push [esp+0Ch+arg_0]
+    { 0x17, 0xFF },
+    { 0x18, 0x74 },
+    { 0x19, 0x24 },
+    { 0x1A, 0x14 },
+
+    // CDirectSoundBuffer_SetConeOutsideVolume+0x38 : retn 0Ch
+    { 0x38, 0xC2 },
+    { 0x39, 0x0C },
+    { 0x3A, 0x00 }
+OOVPA_END;
+
+// ******************************************************************
+// * IDirectSoundBuffer_SetConeOutsideVolume
+// ******************************************************************
+OOVPA_XREF(IDirectSoundBuffer_SetConeOutsideVolume, 3936, 9,
+
+           XRefNoSaveIndex,
+           XRefOne)
+
+    // IDirectSoundBuffer_SetConeOutsideVolume+0x18 : call [CDirectSoundBuffer::SetConeOutsideVolume]
+    XREF_ENTRY(0x19, XREF_DSBUFFERSETCONEOUTSIDEVOLUME),
+
+    // IDirectSoundBuffer_SetConeOutsideVolume+0x0A : push [esp+4+arg_4]
+    { 0x0A, 0xFF },
+    { 0x0B, 0x74 },
+    { 0x0C, 0x24 },
+    { 0x0D, 0x0C },
+
+    // IDirectSoundBuffer_SetConeOutsideVolume+0x15 : and ecx, eax
+    { 0x15, 0x23 },
+    { 0x16, 0xC8 },
+
+    // IDirectSoundBuffer_SetConeOutsideVolume+0x1D : retn 0Ch
+    { 0x1E, 0x0C },
+    { 0x1F, 0x00 }
+OOVPA_END;
+
+// ******************************************************************
+// * IDirectSoundBuffer_Unlock
+// ******************************************************************
+OOVPA_NO_XREF(IDirectSoundBuffer_Unlock, 3936, 5)
+
+    // IDirectSoundBuffer_Unlock+0x00 : xor eax, eax
+    { 0x00, 0x33 },
+    { 0x01, 0xC0 },
+
+    // IDirectSoundBuffer_Unlock+0x02 : ret 14h
+    { 0x02, 0xC2 },
+    { 0x03, 0x14 },
+    { 0x04, 0x00 }
+OOVPA_END;
+
 // ******************************************************************
 // * DSound_3936
 // ******************************************************************
@@ -3943,7 +4068,7 @@ OOVPATable DSound_3936[] = {
 	REGISTER_OOVPA(CDirectSound_CreateSoundStream, 3936, XREF),
 	REGISTER_OOVPA(IDirectSound_CreateSoundStream, 3936, PATCH),
 	REGISTER_OOVPA(CDirectSound_CreateSoundBuffer, 3936, XREF),
-	REGISTER_OOVPA(IDirectSound_CreateBuffer, 3936, PATCH),
+	REGISTER_OOVPA(IDirectSound_CreateSoundBuffer, 3936, PATCH),
 	REGISTER_OOVPA(IDirectSoundBuffer_Release, 3936, PATCH),
 	REGISTER_OOVPA(IDirectSoundBuffer_SetPitchB, 3936, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_SetPitchA, 3936, XREF),
@@ -4082,6 +4207,11 @@ OOVPATable DSound_3936[] = {
 	REGISTER_OOVPA(CDirectSoundBuffer_SetNotificationPositions, 3936, XREF),
 	REGISTER_OOVPA(IDirectSoundBuffer_SetNotificationPositions, 3936, PATCH),
 	REGISTER_OOVPA(CDirectSoundStream_Pause, 3936, PATCH),
+    REGISTER_OOVPA(CDirectSoundBuffer_SetConeOrientation, 3936, XREF),
+    REGISTER_OOVPA(IDirectSoundBuffer_SetConeOrientation, 3936, PATCH),
+    REGISTER_OOVPA(CDirectSoundBuffer_SetConeOutsideVolume, 3936, XREF),
+    REGISTER_OOVPA(IDirectSoundBuffer_SetConeOutsideVolume, 3936, PATCH),
+    REGISTER_OOVPA(IDirectSoundBuffer_Unlock, 3936, PATCH),
 };
 
 // ******************************************************************
