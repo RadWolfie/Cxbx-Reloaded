@@ -51,6 +51,7 @@
 static xbaddr EmuLocateFunction(OOVPA *Oovpa, xbaddr lower, xbaddr upper);
 static void  EmuInstallPatches(OOVPATable *OovpaTable, uint32 OovpaTableSize, Xbe::Header *pXbeHeader);
 static inline void EmuInstallPatch(std::string FunctionName, xbaddr FunctionAddr, void *Patch);
+void EmuInstallPatchesV2(OOVPATable *OovpaTable, uint32 OovpaTableSize, Xbe::SectionHeader *pSectionHeader, uint16_t buildVersion);
 
 #include <shlobj.h>
 #include <unordered_map>
@@ -283,10 +284,21 @@ void EmuHLEIntercept(Xbe::Header *pXbeHeader)
 
             LastUnResolvedXRefs = UnResolvedXRefs;
 
+            bool bDSoundLibSection = false;
+            uint16 preserveVersion = 0;
+
             for(uint32 v=0;v<dwLibraryVersions;v++)
             {
                 uint16 BuildVersion = pLibraryVersion[v].wBuildVersion;
                 uint16 OrigBuildVersion = BuildVersion;
+
+                if (preserveVersion < BuildVersion) {
+                    preserveVersion = BuildVersion;
+                }
+
+				std::string LibraryName(pLibraryVersion[v].szName, pLibraryVersion[v].szName + 8);
+
+                reProcessScan:
 
                 // Aliases - for testing purposes only
 				// TODO: Remove these and come up with a better way to handle XDKs we don't hve databases for
@@ -302,8 +314,10 @@ void EmuHLEIntercept(Xbe::Header *pXbeHeader)
                 if(BuildVersion == 5659) { BuildVersion = 5558; }
 				if(BuildVersion == 5120) { BuildVersion = 5233; }
                 if(BuildVersion == 5933) { BuildVersion = 5849; }   // These XDK versions are pretty much the same
-                
-				std::string LibraryName(pLibraryVersion[v].szName, pLibraryVersion[v].szName + 8);
+
+                Xbe::SectionHeader* pSectionHeaders = reinterpret_cast<Xbe::SectionHeader*>(pXbeHeader->dwSectionHeadersAddr);
+                Xbe::SectionHeader* pSectionScan = nullptr;
+                std::string SectionName;
 
 				if (strcmp(LibraryName.c_str(), Lib_D3D8LTCG) == 0)
 				{
@@ -328,20 +342,23 @@ void EmuHLEIntercept(Xbe::Header *pXbeHeader)
 				}
 				if (strcmp(LibraryName.c_str(), Lib_DSOUND) == 0)
                 {
+                    bDSoundLibSection = true;
 					// Skip scanning for DSOUND symbols when LLE APU is selected
 					if (bLLE_APU)
 						continue;
 
-					// Several 3911 titles has different DSound builds.
-					if(BuildVersion < 4034)
-                    {
+#if ENABLE_LEGACY_DSOUND_DB
+                    // Several 3911 titles has different DSound builds.
+                    if (BuildVersion < 4034) {
                         BuildVersion = 3936;
                     }
 
-					// Redirect other highly similar DSOUND library versions
-					if(BuildVersion == 4361 || BuildVersion == 4400 || BuildVersion == 4432 || 
-						BuildVersion == 4531 )
-						BuildVersion = 4627;
+                    // Redirect other highly similar DSOUND library versions
+                    if (BuildVersion == 4361 || BuildVersion == 4400 || BuildVersion == 4432 ||
+                        BuildVersion == 4531)
+                        BuildVersion = 4627;
+#endif
+
                 }
 				if (strcmp(LibraryName.c_str(), Lib_XAPILIB) == 0)
 				{
@@ -559,20 +576,43 @@ void EmuHLEIntercept(Xbe::Header *pXbeHeader)
 
 				printf("HLE: * Searching HLE database for %s version 1.0.%d... ", LibraryName.c_str(), BuildVersion);
 
-                const HLEData *FoundHLEData = nullptr;
+                bool notFoundHLEDB = true;
+                //HLE Database v1
                 for(uint32 d = 0; d < HLEDataBaseCount; d++) {
 					if (BuildVersion == HLEDataBase[d].BuildVersion && strcmp(LibraryName.c_str(), HLEDataBase[d].Library) == 0) {
-						FoundHLEData = &HLEDataBase[d];
+					    if (g_bPrintfOn) printf("Found\n");
+					    EmuInstallPatches(HLEDataBase[d].OovpaTable, HLEDataBase[d].OovpaTableSize, pXbeHeader);
+                        notFoundHLEDB = false;
 						break;
 					}
                 }
 
-				if (FoundHLEData) {
-					if (g_bPrintfOn) printf("Found\n");
-					EmuInstallPatches(FoundHLEData->OovpaTable, FoundHLEData->OovpaTableSize, pXbeHeader);
-				} else {
-					if (g_bPrintfOn) printf("Skipped\n");
-				}
+                //HLE Database v2
+                if (notFoundHLEDB) {
+                    for (uint32 v = 0; v < pXbeHeader->dwSections; v++) {
+                        SectionName.assign((char*)pSectionHeaders[v].dwSectionNameAddr, (char*)pSectionHeaders[v].dwSectionNameAddr + 8);
+                        if (strcmp(SectionName.c_str(), Lib_DSOUND) == 0) {
+                            pSectionScan = pSectionHeaders + v;
+                            break;
+                        }
+                    }
+                    for (uint32 d2 = 0; d2 < HLEDataBaseCountV2; d2++) {
+                        if (strcmp(LibraryName.c_str(), HLEDataBaseV2[d2].Library) == 0 && pSectionScan != nullptr) {
+                            if (g_bPrintfOn) printf("Found\n");
+                            EmuInstallPatchesV2(HLEDataBaseV2[d2].OovpaTable, HLEDataBaseV2[d2].OovpaTableSize, pSectionScan, OrigBuildVersion);
+                            notFoundHLEDB = false;
+                            break;
+                        }
+                    }
+
+                }
+                if (g_bPrintfOn && notFoundHLEDB) printf("Skipped\n");
+
+                if (v == dwLibraryVersions - 1 && bDSoundLibSection == false) {
+                    LibraryName = Lib_DSOUND;
+                    OrigBuildVersion = BuildVersion = preserveVersion;
+                    goto reProcessScan;
+                }
 			}
 
             bXRefFirstPass = false;
@@ -757,8 +797,9 @@ static xbaddr EmuLocateFunction(OOVPA *Oovpa, xbaddr lower, xbaddr upper)
 				}
 				default:
 				{
-					if (XRefDataBase[Oovpa->XRefSaveIndex] != cur)
+					if (XRefDataBase[Oovpa->XRefSaveIndex] != cur) {
 						EmuWarning("Found OOVPA on other address than in XRefDataBase!");
+					}
 					break;
 				}
 				}
@@ -881,6 +922,222 @@ static void EmuInstallPatches(OOVPATable *OovpaTable, uint32 OovpaTableSize, Xbe
 		output << "\n";
 		printf(output.str().c_str());
 	}
+}
+
+void EmuRegisterSymbol(OOVPATable *OopvaTable, xbaddr pFunc)
+{
+    // Ignore registered symbol in current database.
+    uint32_t hasSymbol = g_SymbolAddresses[OopvaTable->szFuncName];
+    if (hasSymbol != 0)
+        return;
+
+    // Now that we found the address, store it (regardless if we patch it or not)
+    g_SymbolAddresses[OopvaTable->szFuncName] = (uint32_t)pFunc;
+
+    // Output some details
+    std::stringstream output;
+    output << "HLE: 0x" << std::setfill('0') << std::setw(8) << std::hex << pFunc
+        << " -> " << OopvaTable->szFuncName << " " << std::dec << OopvaTable->Version;
+
+    bool IsXRef = (OopvaTable->Flags & Flag_XRef) > 0;
+    if (IsXRef) {
+        output << "\t(XREF)";
+
+        // do we need to save the found address?
+        OOVPA* Oovpa = OopvaTable->Oovpa;
+        if (Oovpa->XRefSaveIndex != XRefNoSaveIndex) {
+            // is the XRef not saved yet?
+            switch (XRefDataBase[Oovpa->XRefSaveIndex]) {
+                case XREF_ADDR_NOT_FOUND:
+                {
+                    EmuWarning("Found OOVPA after first finding nothing?");
+                    // fallthrough to XREF_ADDR_UNDETERMINED
+                }
+                case XREF_ADDR_UNDETERMINED:
+                {
+                    // save and count the found address
+                    UnResolvedXRefs--;
+                    XRefDataBase[Oovpa->XRefSaveIndex] = pFunc;
+                    break;
+                }
+                case XREF_ADDR_DERIVE:
+                {
+                    EmuWarning("Cannot derive a save index!");
+                    break;
+                }
+                default:
+                {
+                    if (XRefDataBase[OopvaTable->Oovpa->XRefSaveIndex] != pFunc) {
+                        EmuWarning("Found OOVPA on other address than in XRefDataBase!");
+                        EmuWarning("%s: %4d - pFunc: %08X, stored: %08X", OopvaTable->szFuncName, Oovpa->XRefSaveIndex, pFunc, XRefDataBase[Oovpa->XRefSaveIndex]);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // Retrieve the associated patch, if any is available
+    void* addr = GetEmuPatchAddr(std::string(OopvaTable->szFuncName));
+    bool DontPatch = (OopvaTable->Flags & Flag_DontPatch) > 0;
+    if (DontPatch) {
+        // Mention if there's an unused patch
+        if (addr != nullptr)
+            output << "\t*PATCH UNUSED!*";
+        else
+            output << "\t*DISABLED*";
+    } else {
+        if (addr != nullptr) {
+            EmuInstallPatch(OopvaTable->szFuncName, pFunc, addr);
+            output << "\t*PATCHED*";
+        } else {
+            // Mention there's no patch available, if it was to be applied
+            if (!IsXRef) // TODO : Remove this restriction once we patch xrefs regularly
+                output << "\t*NO PATCH AVAILABLE!*";
+        }
+    }
+
+    output << "\n";
+    printf(output.str().c_str());
+}
+
+
+// locate the given function, searching within lower and upper bounds
+xbaddr EmuLocateFunctionV2(OOVPA *Oovpa, xbaddr lower, xbaddr upper)
+{
+    // skip out if this is an unnecessary search
+    if (!bXRefFirstPass && Oovpa->XRefCount == XRefZero && Oovpa->XRefSaveIndex == XRefNoSaveIndex)
+        return (xbaddr)nullptr;
+
+    uint32_t derive_indices = 0;
+    // Check all XRefs are known (if not, don't do a useless scan) :
+    for (uint32 v = 0; v < Oovpa->XRefCount; v++) {
+        uint32 XRef;
+        uint08 Offset;
+
+        // get currently registered (un)known address
+        GetXRefEntry(Oovpa, v, XRef, Offset);
+        xbaddr XRefAddr = XRefDataBase[XRef];
+        // Undetermined XRef cannot be checked yet
+        if (XRefAddr == XREF_ADDR_UNDETERMINED)
+            // Skip this scan over the address range
+            return (xbaddr)nullptr;
+
+        // Don't verify an xref that has to be (but isn't yet) derived
+        if (XRefAddr == XREF_ADDR_DERIVE) {
+            // Mark (up to index 32) which xref needs to be derived
+            derive_indices |= (1 << v);
+            continue;
+        }
+    }
+
+    // correct upper bound with highest Oovpa offset
+    uint32 count = Oovpa->Count;
+    {
+        uint32 Offset;
+        uint08 Value; // ignored
+
+        GetOovpaEntry(Oovpa, count - 1, Offset, Value);
+        upper -= Offset;
+    }
+
+    // search all of the image memory
+    for (xbaddr cur = lower; cur < upper; cur++)
+        if (CompareOOVPAToAddress(Oovpa, cur)) {
+
+            while (derive_indices > 0) {
+                uint32 XRef;
+                uint08 Offset;
+                DWORD derive_index;
+
+                // Extract an index from the indices mask :
+                _BitScanReverse(&derive_index, derive_indices); // MSVC intrinsic; GCC has __builtin_clz
+                derive_indices ^= (1 << derive_index);
+
+                // get currently registered (un)known address
+                GetXRefEntry(Oovpa, derive_index, XRef, Offset);
+
+                // Calculate the address where the XRef resides
+                xbaddr XRefAddr = cur + Offset;
+                // Read the address it points to
+                XRefAddr = *((xbaddr*)XRefAddr);
+
+                /* For now assume it's a direct reference;
+                // TODO : Check if it's PC-relative reference?
+                if (XRefAddr + cur + Offset + 4 < XBE_MAX_VA)
+                XRefAddr = XRefAddr + cur + Offset + 4;
+                */
+
+                // Does the address seem valid?
+                if (XRefAddr < XBE_MAX_VA) {
+                    // save and count the derived address
+                    UnResolvedXRefs--;
+                    XRefDataBase[XRef] = XRefAddr;
+                    printf("Derived OOVPA!\n");
+                }
+            }
+
+            return cur;
+        }
+
+    // found nothing
+    return (xbaddr)nullptr;
+}
+
+// install function interception wrappers
+static void EmuInstallPatchesV2(OOVPATable *OovpaTable, uint32 OovpaTableSize, Xbe::SectionHeader *pSectionHeader, uint16_t buildVersion)
+{
+    xbaddr lower = pSectionHeader->dwVirtualAddr;
+
+    // Find the highest address contained within an executable segment
+    xbaddr upper = pSectionHeader->dwVirtualAddr + pSectionHeader->dwVirtualSize;
+
+    // traverse the full OOVPA table
+    OOVPATable *pLoopEnd = &OovpaTable[OovpaTableSize / sizeof(OOVPATable)];
+    OOVPATable *pLoop = OovpaTable;
+    OOVPATable *pLastKnownSymbol = nullptr;
+    xbaddr pLastKnownFunc = 0;
+    const char *SymbolName = nullptr;
+    for (; pLoop < pLoopEnd; pLoop++) {
+
+        if (SymbolName == nullptr) {
+            SymbolName = pLoop->szFuncName;
+        } else if (strcmp(SymbolName, pLoop->szFuncName) != 0) {
+            SymbolName = pLoop->szFuncName;
+            if (pLastKnownSymbol != nullptr) {
+                // Now that we found the address, store it (regardless if we patch it or not)
+                EmuRegisterSymbol(pLastKnownSymbol, pLastKnownFunc);
+                pLastKnownSymbol = nullptr;
+                pLastKnownFunc = 0;
+            }
+        }
+
+        // Never used : skip scans when so configured
+        bool DontScan = (pLoop->Flags & Flag_DontScan) > 0;
+        if (DontScan)
+            continue;
+
+        // Skip higher build version
+        if (buildVersion < pLoop->Version)
+            continue;
+
+        // Search for each function's location using the OOVPA
+        xbaddr pFunc = (xbaddr)EmuLocateFunctionV2(pLoop->Oovpa, lower, upper);
+        if (pFunc == (xbaddr)nullptr)
+            continue;
+
+        if (pFunc == pLastKnownFunc && pLastKnownSymbol == pLoop-1) {
+            if (g_SymbolAddresses[pLastKnownSymbol->szFuncName] == 0) {
+                printf("HLE: Duplicate OOVPA signature found for %s, %d vs %d!\n", pLastKnownSymbol->szFuncName, pLastKnownSymbol->Version, pLoop->Version);
+            }
+        }
+
+        pLastKnownFunc = pFunc;
+        pLastKnownSymbol = pLoop;
+    }
+    if (pLastKnownSymbol != nullptr) {
+        EmuRegisterSymbol(pLastKnownSymbol, pLastKnownFunc);
+    }
 }
 
 #ifdef _DEBUG_TRACE

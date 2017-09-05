@@ -120,10 +120,21 @@ extern const struct HLEData
 }
 HLEDataBase[];
 
+extern const struct HLEDataV2
+{
+    const char     *Library;
+
+    OOVPATable  *OovpaTable;
+    uint32          OovpaTableSize;
+}
+HLEDataBaseV2[];
+
 // ******************************************************************
 // * HLEDataBaseCount
 // ******************************************************************
 extern const uint32 HLEDataBaseCount;
+
+extern const uint32 HLEDataBaseCountV2;
 
 // ******************************************************************
 // * XRefDataBaseOffset
@@ -208,7 +219,7 @@ enum XRefDataBaseOffset
     XREF_DSBUFFERLOCKA,
     XREF_DSBUFFERSETHEADROOMA,
     XREF_DSBUFFERSETFREQUENCYA,
-    XREF_DSBUFFERSETFREQUENCYB,
+    XREF_CDirectSoundVoice_SetFrequency,
     XREF_DSSTREAMSETMAXDISTANCE1A,
     XREF_DSSTREAMSETMAXDISTANCE1B,
     XREF_DSSTREAMSETMAXDISTANCE1C,
@@ -322,6 +333,7 @@ enum XRefDataBaseOffset
 	XREF_CMcpxBuffer_Play2,
 	XREF_CDirectSoundVoice_Use3DVoiceData,
 	XREF_CDirectSoundBuffer_Use3DVoiceData,
+	XREF_CDirectSound_SetEffectData,
 	// XACT
 	// +s
 	XREF_XACT_CEngine_RegisterWaveBank,
