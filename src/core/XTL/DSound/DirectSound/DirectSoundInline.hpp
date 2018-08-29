@@ -7,7 +7,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   Cxbx->Win32->CxbxKrnl->EmuDSoundInline.hpp
+// *   src->core->XTL->DSound->DirectSound->DirectSoundInline.hpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -36,7 +36,7 @@
 #ifndef EMUDSOUNDINLINE_H
 #define EMUDSOUNDINLINE_H
 
-#include "XADPCM.h"
+#include "Common/XADPCM.h"
 
 CRITICAL_SECTION                    g_DSoundCriticalSection;
 #define enterCriticalSection        EnterCriticalSection(&g_DSoundCriticalSection)
