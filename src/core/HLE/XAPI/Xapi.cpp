@@ -612,10 +612,11 @@ HANDLE WINAPI XTL::EMUPATCH(XInputOpen)
     return 0;
 }
 
+namespace XTL {
 // ******************************************************************
 // * patch: XInputClose
 // ******************************************************************
-VOID WINAPI XTL::EMUPATCH(XInputClose)
+VOID WINAPI EMUPATCH(XInputClose)
 (
     IN HANDLE hDevice
 )
@@ -663,6 +664,10 @@ VOID WINAPI XTL::EMUPATCH(XInputClose)
             break;
         }
     }
+}
+
+// Patch func assignment will be go in plugin's initialize class
+XInputClose_def HLE_XInputClose = EMUPATCH(XInputClose);
 }
 
 // ******************************************************************

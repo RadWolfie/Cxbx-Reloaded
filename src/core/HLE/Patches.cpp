@@ -370,7 +370,8 @@ std::map<const std::string, const xbox_patch_t> g_PatchTable = {
 	PATCH_ENTRY("XGetDeviceEnumerationStatus", XTL::EMUPATCH(XGetDeviceEnumerationStatus), PATCH_HLE_OHCI),
 	PATCH_ENTRY("XGetDevices", XTL::EMUPATCH(XGetDevices), PATCH_HLE_OHCI),
 	PATCH_ENTRY("XInitDevices", XTL::EMUPATCH(XInitDevices), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputClose", XTL::EMUPATCH(XInputClose), PATCH_HLE_OHCI),
+	// Use the pointer of pointer from global variable for get current assigned patch from plugin. 
+	PATCH_ENTRY("XInputClose", &XTL::HLE_XInputClose, PATCH_HLE_OHCI),
 	PATCH_ENTRY("XInputGetCapabilities", XTL::EMUPATCH(XInputGetCapabilities), PATCH_HLE_OHCI),
 	PATCH_ENTRY("XInputGetDeviceDescription", XTL::EMUPATCH(XInputGetDeviceDescription), PATCH_HLE_OHCI),
 	PATCH_ENTRY("XInputGetState", XTL::EMUPATCH(XInputGetState), PATCH_HLE_OHCI),

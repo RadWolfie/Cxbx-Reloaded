@@ -634,6 +634,8 @@ HANDLE WINAPI EMUPATCH(XInputOpen)
     IN PX_XINPUT_POLLING_PARAMETERS   pPollingParameters OPTIONAL
 );
 
+/* Then we no longer need EMUPATCH(XInputClose) in header to allow
+// individual plugin to use same function name in source code level.
 // ******************************************************************
 // * patch: XInputClose
 // ******************************************************************
@@ -641,6 +643,11 @@ VOID WINAPI EMUPATCH(XInputClose)
 (
     IN HANDLE hDevice
 );
+*/
+// Define the standard API usage
+typedef VOID(WINAPI *XInputClose_def)(IN HANDLE hDevice);
+// Delcare patch API as global with initialize to nullptr
+extern XInputClose_def HLE_XInputClose;
 
 // ******************************************************************
 // * patch: XInputPoll
