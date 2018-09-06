@@ -56,7 +56,7 @@ _XTL_BEGIN
 // ******************************************************************
 // * patch: SetThreadPriorityBoost
 // ******************************************************************
-BOOL WINAPI EMUPATCH(SetThreadPriorityBoost)
+static BOOL WINAPI EMUPATCH(SetThreadPriorityBoost)
 (
 	HANDLE  hThread,
 	BOOL    DisablePriorityBoost
@@ -80,7 +80,7 @@ BOOL WINAPI EMUPATCH(SetThreadPriorityBoost)
 // ******************************************************************
 // * patch: SetThreadPriority
 // ******************************************************************
-BOOL WINAPI EMUPATCH(SetThreadPriority)
+static BOOL WINAPI EMUPATCH(SetThreadPriority)
 (
 	HANDLE  hThread,
 	int     nPriority
@@ -105,7 +105,7 @@ BOOL WINAPI EMUPATCH(SetThreadPriority)
 // ******************************************************************
 // * patch: GetThreadPriority
 // ******************************************************************
-int WINAPI EMUPATCH(GetThreadPriority)
+static int WINAPI EMUPATCH(GetThreadPriority)
 (
 	HANDLE  hThread
 )
@@ -125,7 +125,7 @@ int WINAPI EMUPATCH(GetThreadPriority)
 // ******************************************************************
 // * patch: GetExitCodeThread
 // ******************************************************************
-BOOL WINAPI EMUPATCH(GetExitCodeThread)
+static BOOL WINAPI EMUPATCH(GetExitCodeThread)
 (
 	HANDLE  hThread,
 	LPDWORD lpExitCode
@@ -146,7 +146,7 @@ BOOL WINAPI EMUPATCH(GetExitCodeThread)
 // ******************************************************************
 // * patch: XapiThreadStartup
 // ******************************************************************
-VOID WINAPI EMUPATCH(XapiThreadStartup)
+static VOID WINAPI EMUPATCH(XapiThreadStartup)
 (
 	DWORD dwDummy1,
 	DWORD dwDummy2
@@ -179,7 +179,7 @@ VOID WINAPI EMUPATCH(XapiThreadStartup)
 // ******************************************************************
 // * patch: XRegisterThreadNotifyRoutine
 // ******************************************************************
-VOID WINAPI EMUPATCH(XRegisterThreadNotifyRoutine)
+static VOID WINAPI EMUPATCH(XRegisterThreadNotifyRoutine)
 (
 	PXTHREAD_NOTIFICATION   pThreadNotification,
 	BOOL                    fRegister
@@ -245,7 +245,7 @@ void WINAPI EmuFiberStartup(fiber_context_t* context)
 // ******************************************************************
 // * patch: CreateFiber
 // ******************************************************************
-LPVOID WINAPI EMUPATCH(CreateFiber)
+static LPVOID WINAPI EMUPATCH(CreateFiber)
 (
 	DWORD                   dwStackSize,
 	LPFIBER_START_ROUTINE   lpStartRoutine,
@@ -273,7 +273,7 @@ LPVOID WINAPI EMUPATCH(CreateFiber)
 // ******************************************************************
 // * patch: DeleteFiber
 // ******************************************************************
-VOID WINAPI EMUPATCH(DeleteFiber)
+static VOID WINAPI EMUPATCH(DeleteFiber)
 (
 	LPVOID                  lpFiber
 )
@@ -287,7 +287,7 @@ VOID WINAPI EMUPATCH(DeleteFiber)
 // ******************************************************************
 // * patch: SwitchToFiber
 // ******************************************************************
-VOID WINAPI EMUPATCH(SwitchToFiber)
+static VOID WINAPI EMUPATCH(SwitchToFiber)
 (
 	LPVOID lpFiber
 )
@@ -301,7 +301,7 @@ VOID WINAPI EMUPATCH(SwitchToFiber)
 // ******************************************************************
 // * patch: ConvertThreadToFiber
 // ******************************************************************
-LPVOID WINAPI EMUPATCH(ConvertThreadToFiber)
+static LPVOID WINAPI EMUPATCH(ConvertThreadToFiber)
 (
 	LPVOID lpParameter
 )
@@ -317,7 +317,7 @@ LPVOID WINAPI EMUPATCH(ConvertThreadToFiber)
 // ******************************************************************
 // * patch: QueryPerformanceCounter
 // ******************************************************************
-BOOL WINAPI EMUPATCH(QueryPerformanceCounter)
+static BOOL WINAPI EMUPATCH(QueryPerformanceCounter)
 (
 	LARGE_INTEGER * lpPerformanceCount
 )
@@ -331,7 +331,7 @@ BOOL WINAPI EMUPATCH(QueryPerformanceCounter)
 // ******************************************************************
 // * patch: QueueUserAPC
 // ******************************************************************
-DWORD WINAPI EMUPATCH(QueueUserAPC)
+static DWORD WINAPI EMUPATCH(QueueUserAPC)
 (
 	PAPCFUNC    pfnAPC,
 	HANDLE      hThread,
@@ -364,7 +364,7 @@ DWORD WINAPI EMUPATCH(QueueUserAPC)
 // ******************************************************************
 // * patch: GetOverlappedResult
 // ******************************************************************
-BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
+static BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 (
 	HANDLE          hFile,
 	LPOVERLAPPED    lpOverlapped,
@@ -391,7 +391,7 @@ BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 // ******************************************************************
 // * patch: XLaunchNewImageA
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XLaunchNewImageA)
+static DWORD WINAPI EMUPATCH(XLaunchNewImageA)
 (
 	LPCSTR          lpTitlePath,
 	PLAUNCH_DATA    pLaunchData
@@ -474,7 +474,7 @@ DWORD WINAPI EMUPATCH(XLaunchNewImageA)
 // ******************************************************************
 // * patch: XGetLaunchInfo
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XGetLaunchInfo)
+static DWORD WINAPI EMUPATCH(XGetLaunchInfo)
 (
 	PDWORD          pdwLaunchDataType,
 	PLAUNCH_DATA    pLaunchData
@@ -524,7 +524,7 @@ DWORD WINAPI EMUPATCH(XGetLaunchInfo)
 // ******************************************************************
 // * patch: XSetProcessQuantumLength
 // ******************************************************************
-VOID WINAPI EMUPATCH(XSetProcessQuantumLength)
+static VOID WINAPI EMUPATCH(XSetProcessQuantumLength)
 (
 	DWORD dwMilliseconds
 )
@@ -535,11 +535,11 @@ VOID WINAPI EMUPATCH(XSetProcessQuantumLength)
 	// TODO: Implement?
 	LOG_IGNORED();
 }
-	
+
 // ******************************************************************
 // * patch: SignalObjectAndWait
 // ******************************************************************
-DWORD WINAPI EMUPATCH(SignalObjectAndWait)
+static DWORD WINAPI EMUPATCH(SignalObjectAndWait)
 (
 	HANDLE  hObjectToSignal,
 	HANDLE  hObjectToWaitOn,
@@ -563,7 +563,7 @@ DWORD WINAPI EMUPATCH(SignalObjectAndWait)
 // ******************************************************************
 // * patch: timeSetEvent
 // ******************************************************************
-MMRESULT WINAPI EMUPATCH(timeSetEvent)
+static MMRESULT WINAPI EMUPATCH(timeSetEvent)
 (
 	UINT            uDelay,
 	UINT            uResolution,
@@ -590,7 +590,7 @@ MMRESULT WINAPI EMUPATCH(timeSetEvent)
 // ******************************************************************
 // * patch: timeKillEvent
 // ******************************************************************
-MMRESULT WINAPI EMUPATCH(timeKillEvent)
+static MMRESULT WINAPI EMUPATCH(timeKillEvent)
 (
 	UINT uTimerID
 )
@@ -607,7 +607,7 @@ MMRESULT WINAPI EMUPATCH(timeKillEvent)
 // ******************************************************************
 // * patch: RaiseException
 // ******************************************************************
-VOID WINAPI EMUPATCH(RaiseException)
+static VOID WINAPI EMUPATCH(RaiseException)
 (
 	DWORD           dwExceptionCode,       // exception code
 	DWORD           dwExceptionFlags,      // continuable exception flag
@@ -633,7 +633,7 @@ VOID WINAPI EMUPATCH(RaiseException)
 // ******************************************************************
 // patch: XMountMUA
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XMountMUA)
+static DWORD WINAPI EMUPATCH(XMountMUA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,
@@ -657,7 +657,7 @@ DWORD WINAPI EMUPATCH(XMountMUA)
 // ******************************************************************
 // * patch: XMountMURootA
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XMountMURootA)
+static DWORD WINAPI EMUPATCH(XMountMURootA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,
@@ -681,7 +681,7 @@ DWORD WINAPI EMUPATCH(XMountMURootA)
 // ******************************************************************
 // * patch: OutputDebugStringA
 // ******************************************************************
-VOID WINAPI EMUPATCH(OutputDebugStringA)
+static VOID WINAPI EMUPATCH(OutputDebugStringA)
 (
 	IN LPCSTR lpOutputString
 )

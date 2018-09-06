@@ -35,7 +35,7 @@
 // ******************************************************************
 #define _XBOXKRNL_DEFEXTRN_
 
-#define LOG_PREFIX CXBXR_MODULE::XAPI
+#define LOG_PREFIX CXBXR_MODULE::OHCI
 
 #undef FIELD_OFFSET     // prevent macro redefinition warnings
 /* prevent name collisions */
@@ -262,7 +262,7 @@ _XTL_BEGIN
 // ******************************************************************
 // * patch: XInitDevices
 // ******************************************************************
-VOID WINAPI EMUPATCH(XInitDevices)
+static VOID WINAPI EMUPATCH(XInitDevices)
 (
 	DWORD                   dwPreallocTypeCount,
 	PXDEVICE_PREALLOC_TYPE  PreallocTypes
@@ -382,7 +382,7 @@ bool TitleIsLegoSW()
 // * This in turn requires USB LLE to be implemented, or USBD_Init 
 // * patched with a stub, so this patch is still enabled for now
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XGetDevices)
+static DWORD WINAPI EMUPATCH(XGetDevices)
 (
 	PXPP_DEVICE_TYPE DeviceType
 )
@@ -429,7 +429,7 @@ DWORD WINAPI EMUPATCH(XGetDevices)
 // * This in turn requires USB LLE to be implemented, or USBD_Init 
 // * patched with a stub, so this patch is still enabled for now
 // ******************************************************************
-BOOL WINAPI EMUPATCH(XGetDeviceChanges)
+static BOOL WINAPI EMUPATCH(XGetDeviceChanges)
 (
 	PXPP_DEVICE_TYPE DeviceType,
 	PDWORD           pdwInsertions,
@@ -502,7 +502,7 @@ BOOL WINAPI EMUPATCH(XGetDeviceChanges)
 // ******************************************************************
 // * patch: XInputOpen
 // ******************************************************************
-HANDLE WINAPI EMUPATCH(XInputOpen)
+static HANDLE WINAPI EMUPATCH(XInputOpen)
 (
 	IN PXPP_DEVICE_TYPE             DeviceType,
 	IN DWORD                        dwPort,
@@ -612,7 +612,7 @@ HANDLE WINAPI EMUPATCH(XInputOpen)
 // ******************************************************************
 // * patch: XInputClose
 // ******************************************************************
-VOID WINAPI EMUPATCH(XInputClose)
+static VOID WINAPI EMUPATCH(XInputClose)
 (
 	IN HANDLE hDevice
 )
@@ -665,7 +665,7 @@ VOID WINAPI EMUPATCH(XInputClose)
 // ******************************************************************
 // * patch: XInputPoll
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XInputPoll)
+static DWORD WINAPI EMUPATCH(XInputPoll)
 (
 	IN HANDLE hDevice
 )
@@ -739,7 +739,7 @@ DWORD WINAPI EMUPATCH(XInputPoll)
 // ******************************************************************
 // * patch: XInputGetCapabilities
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XInputGetCapabilities)
+static DWORD WINAPI EMUPATCH(XInputGetCapabilities)
 (
 	IN  HANDLE               hDevice,
 	OUT PX_XINPUT_CAPABILITIES pCapabilities
@@ -1019,7 +1019,7 @@ void EmuSBCGetState(XTL::PX_SBC_GAMEPAD pSBCGamepad, XTL::PX_XINPUT_GAMEPAD pXIG
 // ******************************************************************
 // * patch: XInputGetState
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XInputGetState)
+static DWORD WINAPI EMUPATCH(XInputGetState)
 (
 	IN  HANDLE         hDevice,
 	OUT PX_XINPUT_STATE  pState
@@ -1110,7 +1110,7 @@ DWORD WINAPI EMUPATCH(XInputGetState)
 // ******************************************************************
 // * patch: XInputSetState
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XInputSetState)
+static DWORD WINAPI EMUPATCH(XInputSetState)
 (
 	IN     HANDLE           hDevice,
 	IN OUT PX_XINPUT_FEEDBACK pFeedback
@@ -1242,7 +1242,7 @@ DWORD WINAPI EMUPATCH(XInputSetState)
 // ******************************************************************
 // patch: XMountMUA
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XMountMUA)
+static DWORD WINAPI EMUPATCH(XMountMUA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,
@@ -1267,7 +1267,7 @@ DWORD WINAPI EMUPATCH(XMountMUA)
 // ******************************************************************
 // * patch: XGetDeviceEnumerationStatus
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XGetDeviceEnumerationStatus)()
+static DWORD WINAPI EMUPATCH(XGetDeviceEnumerationStatus)()
 {
 
 
@@ -1281,7 +1281,7 @@ DWORD WINAPI EMUPATCH(XGetDeviceEnumerationStatus)()
 // ******************************************************************
 // * patch: XInputGetDeviceDescription
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XInputGetDeviceDescription)
+static DWORD WINAPI EMUPATCH(XInputGetDeviceDescription)
 (
 	HANDLE  hDevice,
 	PVOID   pDescription
@@ -1304,7 +1304,7 @@ DWORD WINAPI EMUPATCH(XInputGetDeviceDescription)
 // ******************************************************************
 // * patch: XMountMURootA
 // ******************************************************************
-DWORD WINAPI EMUPATCH(XMountMURootA)
+static DWORD WINAPI EMUPATCH(XMountMURootA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,

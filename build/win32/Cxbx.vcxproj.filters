@@ -638,6 +638,9 @@
     <ClCompile Include="..\..\src\core\HLE\XAPI\XapiPlugins.cpp">
       <Filter>core\HLE\XAPI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\TraceAPI\TraceApiPlugin.cpp">
+      <Filter>core\HLE\XAPI\OHCI\TraceAPI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resource\Splash.jpg">
@@ -803,6 +806,9 @@
     </Filter>
     <Filter Include="core\HLE\D3D8\Direct3D9">
       <UniqueIdentifier>{c56dc02e-4531-4cd2-aac2-a3c97eec11c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\HLE\XAPI\OHCI\TraceAPI">
+      <UniqueIdentifier>{6af2a0dc-836c-48db-a26a-68a3242646c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

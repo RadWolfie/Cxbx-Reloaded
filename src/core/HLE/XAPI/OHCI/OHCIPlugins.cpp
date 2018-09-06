@@ -59,7 +59,18 @@ void init_xapi_ohci_plugins()
 	HLE_XInputSetState = nullptr;
 
 	// Check which plugin to use then initialize specific plugin.
-	init_xapi_ohci_plugin_xinput();
+	uint ochi_plugin = 2; // As example to use, may will be change later on.
+	switch(ochi_plugin) {
+		case 1:
+			init_xapi_ohci_plugin_trace_api();
+			break;
+		case 2:
+			init_xapi_ohci_plugin_xinput();
+			break;
+		default:
+			// Do nothing, leave HLE's OHCI as not patch.
+			break;
+	}
 }
 
 _XTL_END
