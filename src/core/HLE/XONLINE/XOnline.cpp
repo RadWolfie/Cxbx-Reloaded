@@ -40,7 +40,7 @@
 #include "CxbxKrnl/Emu.h"
 #include "Common/Logging.h"
 #include "CxbxKrnl/EmuFS.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 
 /*
 // ******************************************************************

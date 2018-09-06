@@ -54,7 +54,7 @@ namespace xboxkrnl
 #include "CxbxKrnl/DbgConsole.h"
 #include "CxbxKrnl/ResourceTracker.h"
 #include "CxbxKrnl/VMManager.h" // for g_VMManager
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "Logging.h"
 #include "../XbD3D8Logging.h"
 #include "core/HLE/Intercept.hpp" // for bLLE_GPU

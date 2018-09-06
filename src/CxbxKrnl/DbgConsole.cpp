@@ -40,7 +40,7 @@
 #include "Emu.h"
 #include "DbgConsole.h"
 #include "ResourceTracker.h"
-#include "EmuXTL.h"
+#include "core/XTL.h"
 
 #include <conio.h>
 

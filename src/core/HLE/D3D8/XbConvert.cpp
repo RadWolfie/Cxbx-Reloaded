@@ -37,7 +37,7 @@
 #define _XBOXKRNL_DEFEXTRN_
 
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "XbConvert.h"
 
 // About format color components:

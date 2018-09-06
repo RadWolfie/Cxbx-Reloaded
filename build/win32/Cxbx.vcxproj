@@ -208,6 +208,11 @@
     <ClInclude Include="..\..\src\Common\Win32\XBPortMapping.h" />
     <ClInclude Include="..\..\src\Common\XADPCM.h" />
     <ClInclude Include="..\..\src\Common\XbePrinter.h" />
+    <ClInclude Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.h" />
+    <ClInclude Include="..\..\src\core\HLE\XAPI\OHCI\XbOHCI.hpp" />
+    <ClInclude Include="..\..\src\core\HLE\XAPI\XapiPlugins.h" />
+    <ClInclude Include="..\..\src\core\HLE\CommonHLE.h" />
+    <ClInclude Include="..\..\src\core\XTL.h" />
     <ClInclude Include="..\..\src\CxbxKrnl\crc32c.h" />
     <ClInclude Include="..\..\src\core\HLE\D3D8\XbD3D8Logging.h" />
     <ClInclude Include="..\..\src\Common\EmuEEPROM.h" />
@@ -240,11 +245,10 @@
     <ClInclude Include="..\..\src\CxbxKrnl\EmuSha.h" />
     <ClInclude Include="..\..\src\CxbxKrnl\EmuX86.h" />
     <ClInclude Include="..\..\src\core\HLE\XACTENG\XactEng.h" />
-    <ClInclude Include="..\..\src\core\HLE\XAPI\Xapi.h" />
+    <ClInclude Include="..\..\src\core\HLE\XAPI\XbXapi.hpp" />
     <ClInclude Include="..\..\src\core\HLE\XGRAPHIC\XGraphic.h" />
     <ClInclude Include="..\..\src\core\HLE\XAPI\OHCI\XInput\XInput.h" />
     <ClInclude Include="..\..\src\core\HLE\XONLINE\XOnline.h" />
-    <ClInclude Include="..\..\src\CxbxKrnl\EmuXTL.h" />
     <ClInclude Include="..\..\src\CxbxKrnl\gloffscreen\glextensions.h" />
     <ClInclude Include="..\..\src\CxbxKrnl\gloffscreen\gloffscreen.h" />
     <ClInclude Include="..\..\src\core\HLE\Intercept.hpp" />
@@ -351,6 +355,9 @@
     <ClCompile Include="..\..\src\Common\CxbxDebugger.cpp" />
     <ClCompile Include="..\..\src\Common\Win32\XBPortMapping.cpp" />
     <ClCompile Include="..\..\src\Common\XbePrinter.cpp" />
+    <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.cpp" />
+    <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\XInput\XInputPlugin.cpp" />
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XbXapi.cpp" />
     <ClCompile Include="..\..\src\CxbxKrnl\crc32c.cpp" />
     <ClCompile Include="..\..\src\core\HLE\D3D8\XbD3D8Logging.cpp" />
     <ClCompile Include="..\..\src\Common\EmuEEPROM.cpp" />
@@ -437,7 +444,7 @@
     <ClCompile Include="..\..\src\CxbxKrnl\EmuSha.cpp" />
     <ClCompile Include="..\..\src\CxbxKrnl\EmuX86.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XACTENG\XactEng.cpp" />
-    <ClCompile Include="..\..\src\core\HLE\XAPI\Xapi.cpp" />
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XapiPlugin.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XGRAPHIC\XGraphic.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\XInput\XInput.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XONLINE\XOnline.cpp" />

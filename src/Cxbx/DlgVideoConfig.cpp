@@ -42,7 +42,7 @@
 #include "DlgVideoConfig.h"
 #include "ResCxbx.h"
 
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 
 /*! windows dialog procedure */
 static INT_PTR CALLBACK DlgVideoConfigProc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);

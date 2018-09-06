@@ -40,7 +40,7 @@
 #include "CxbxKrnl/VMManager.h"
 #include "CxbxKrnl/xxhash32.h" // For XXHash32::hash()
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "CxbxKrnl/ResourceTracker.h"
 
 // TODO: Find somewhere to put this that doesn't conflict with XTL::

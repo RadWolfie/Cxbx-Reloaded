@@ -40,7 +40,7 @@
 #include <assert.h> // For assert()
 
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "XbD3D8Types.h" // For X_D3DFORMAT
 #include "CxbxKrnl/ResourceTracker.h"
 #include "devices/video/nv2a.h" // For PGRAPHState

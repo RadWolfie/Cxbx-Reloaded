@@ -37,7 +37,7 @@
 #define LOG_PREFIX CXBXR_MODULE::D3DST
 
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 
 // deferred state lookup tables
 DWORD *XTL::EmuD3DDeferredRenderState = nullptr;

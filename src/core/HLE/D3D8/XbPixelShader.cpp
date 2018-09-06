@@ -75,7 +75,7 @@
 
 #include "CxbxKrnl/Emu.h"
 #include "CxbxKrnl/EmuFS.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 
 //#include <CxbxKrnl/EmuD3D8Types.h> // X_PSH_COMBINECOUNT
 

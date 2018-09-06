@@ -133,9 +133,6 @@
     <ClCompile Include="..\..\src\core\HLE\XACTENG\XactEng.cpp">
       <Filter>core\HLE\XACTENG</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\HLE\XAPI\Xapi.cpp">
-      <Filter>core\HLE\XAPI</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\core\HLE\XGRAPHIC\XGraphic.cpp">
       <Filter>core\HLE\XGRAPHIC</Filter>
     </ClCompile>
@@ -407,9 +404,6 @@
     <ClInclude Include="..\..\src\core\HLE\XACTENG\XactEng.h">
       <Filter>core\HLE\XACTENG</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\core\HLE\XAPI\Xapi.h">
-      <Filter>core\HLE\XAPI</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\core\HLE\XGRAPHIC\XGraphic.h">
       <Filter>core\HLE\XGRAPHIC</Filter>
     </ClInclude>
@@ -418,9 +412,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\core\HLE\XONLINE\XOnline.h">
       <Filter>core\HLE\XONLINE</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\CxbxKrnl\EmuXTL.h">
-      <Filter>Emulator</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\core\HLE\Intercept.hpp">
       <Filter>core\HLE</Filter>
@@ -632,6 +623,18 @@
     <ClCompile Include="..\..\src\core\HLE\Patches.cpp">
       <Filter>core\HLE</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XbXapi.cpp">
+      <Filter>core\HLE\XAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XapiPlugin.cpp">
+      <Filter>core\HLE\XAPI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\XInput\XInputPlugin.cpp">
+      <Filter>core\HLE\XAPI\OHCI\XInput</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.cpp">
+      <Filter>core\HLE\XAPI\OHCI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resource\Splash.jpg">
@@ -807,5 +810,25 @@
   <ItemGroup>
     <Image Include="..\..\resource\Cxbx-R.ico" />
     <Image Include="..\..\resource\Logo-License-CC4.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\core\HLE\XAPI\XbXapi.hpp">
+      <Filter>core\HLE\XAPI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\HLE\XAPI\OHCI\XbOHCI.hpp">
+      <Filter>core\HLE\XAPI\OHCI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\XTL.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\HLE\CommonHLE.h">
+      <Filter>core\HLE</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.h">
+      <Filter>core\HLE\XAPI\OHCI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\core\HLE\XAPI\XapiPlugins.h">
+      <Filter>core\HLE\XAPI</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -37,7 +37,7 @@
 
 #include "CxbxKrnl/CxbxKrnl.h"
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "Patches.hpp"
 #include "Intercept.hpp"
 
@@ -366,36 +366,36 @@ std::map<const std::string, const xbox_patch_t> g_PatchTable = {
 	PATCH_ENTRY("XAudioSetEffectData", XTL::EMUPATCH(XAudioSetEffectData), PATCH_HLE_DSOUND),
 
 	// OHCI
-	PATCH_ENTRY("XGetDeviceChanges", XTL::EMUPATCH(XGetDeviceChanges), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XGetDeviceEnumerationStatus", XTL::EMUPATCH(XGetDeviceEnumerationStatus), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XGetDevices", XTL::EMUPATCH(XGetDevices), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInitDevices", XTL::EMUPATCH(XInitDevices), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputClose", XTL::EMUPATCH(XInputClose), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputGetCapabilities", XTL::EMUPATCH(XInputGetCapabilities), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputGetDeviceDescription", XTL::EMUPATCH(XInputGetDeviceDescription), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputGetState", XTL::EMUPATCH(XInputGetState), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputOpen", XTL::EMUPATCH(XInputOpen), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputPoll", XTL::EMUPATCH(XInputPoll), PATCH_HLE_OHCI),
-	PATCH_ENTRY("XInputSetState", XTL::EMUPATCH(XInputSetState), PATCH_HLE_OHCI),
+	PATCH_ENTRY("XGetDeviceChanges", XTL::HLE_XGetDeviceChanges, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XGetDeviceEnumerationStatus", XTL::HLE_XGetDeviceEnumerationStatus, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XGetDevices", XTL::HLE_XGetDevices, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInitDevices", XTL::HLE_XInitDevices, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputClose", XTL::HLE_XInputClose, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputGetCapabilities", XTL::HLE_XInputGetCapabilities, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputGetDeviceDescription", XTL::HLE_XInputGetDeviceDescription, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputGetState", XTL::HLE_XInputGetState, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputOpen", XTL::HLE_XInputOpen, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputPoll", XTL::HLE_XInputPoll, PATCH_HLE_OHCI),
+	PATCH_ENTRY("XInputSetState", XTL::HLE_XInputSetState, PATCH_HLE_OHCI),
 
 	// XAPI
-	PATCH_ENTRY("ConvertThreadToFiber", XTL::EMUPATCH(ConvertThreadToFiber), PATCH_ALWAYS),
-	PATCH_ENTRY("CreateFiber", XTL::EMUPATCH(CreateFiber), PATCH_ALWAYS),
-	PATCH_ENTRY("DeleteFiber", XTL::EMUPATCH(DeleteFiber), PATCH_ALWAYS),
-	PATCH_ENTRY("GetExitCodeThread", XTL::EMUPATCH(GetExitCodeThread), PATCH_ALWAYS),
-	PATCH_ENTRY("GetThreadPriority", XTL::EMUPATCH(GetThreadPriority), PATCH_ALWAYS),
-	PATCH_ENTRY("OutputDebugStringA", XTL::EMUPATCH(OutputDebugStringA), PATCH_ALWAYS),
-	PATCH_ENTRY("QueryPerformanceCounter", XTL::EMUPATCH(QueryPerformanceCounter), PATCH_ALWAYS),
-	PATCH_ENTRY("RaiseException", XTL::EMUPATCH(RaiseException), PATCH_ALWAYS),
-	PATCH_ENTRY("SetThreadPriority", XTL::EMUPATCH(SetThreadPriority), PATCH_ALWAYS),
-	PATCH_ENTRY("SetThreadPriorityBoost", XTL::EMUPATCH(SetThreadPriorityBoost), PATCH_ALWAYS),
-	PATCH_ENTRY("SignalObjectAndWait", XTL::EMUPATCH(SignalObjectAndWait), PATCH_ALWAYS),
-	PATCH_ENTRY("SwitchToFiber", XTL::EMUPATCH(SwitchToFiber), PATCH_ALWAYS),
-	PATCH_ENTRY("XMountMUA", XTL::EMUPATCH(XMountMUA), PATCH_ALWAYS),
-	PATCH_ENTRY("XMountMURootA", XTL::EMUPATCH(XMountMURootA), PATCH_ALWAYS),
-	PATCH_ENTRY("XSetProcessQuantumLength", XTL::EMUPATCH(XSetProcessQuantumLength), PATCH_ALWAYS),
-	PATCH_ENTRY("timeKillEvent", XTL::EMUPATCH(timeKillEvent), PATCH_ALWAYS),
-	PATCH_ENTRY("timeSetEvent", XTL::EMUPATCH(timeSetEvent), PATCH_ALWAYS),
+	PATCH_ENTRY("ConvertThreadToFiber", XTL::HLE_ConvertThreadToFiber, PATCH_ALWAYS),
+	PATCH_ENTRY("CreateFiber", XTL::HLE_CreateFiber, PATCH_ALWAYS),
+	PATCH_ENTRY("DeleteFiber", XTL::HLE_DeleteFiber, PATCH_ALWAYS),
+	PATCH_ENTRY("GetExitCodeThread", XTL::HLE_GetExitCodeThread, PATCH_ALWAYS),
+	PATCH_ENTRY("GetThreadPriority", XTL::HLE_GetThreadPriority, PATCH_ALWAYS),
+	PATCH_ENTRY("OutputDebugStringA", XTL::HLE_OutputDebugStringA, PATCH_ALWAYS),
+	PATCH_ENTRY("QueryPerformanceCounter", XTL::HLE_QueryPerformanceCounter, PATCH_ALWAYS),
+	PATCH_ENTRY("RaiseException", XTL::HLE_RaiseException, PATCH_ALWAYS),
+	PATCH_ENTRY("SetThreadPriority", XTL::HLE_SetThreadPriority, PATCH_ALWAYS),
+	PATCH_ENTRY("SetThreadPriorityBoost", XTL::HLE_SetThreadPriorityBoost, PATCH_ALWAYS),
+	PATCH_ENTRY("SignalObjectAndWait", XTL::HLE_SignalObjectAndWait, PATCH_ALWAYS),
+	PATCH_ENTRY("SwitchToFiber", XTL::HLE_SwitchToFiber, PATCH_ALWAYS),
+	PATCH_ENTRY("XMountMUA", XTL::HLE_XMountMUA, PATCH_ALWAYS),
+	PATCH_ENTRY("XMountMURootA", XTL::HLE_XMountMURootA, PATCH_ALWAYS),
+	PATCH_ENTRY("XSetProcessQuantumLength", XTL::HLE_XSetProcessQuantumLength, PATCH_ALWAYS),
+	PATCH_ENTRY("timeKillEvent", XTL::HLE_timeKillEvent, PATCH_ALWAYS),
+	PATCH_ENTRY("timeSetEvent", XTL::HLE_timeSetEvent, PATCH_ALWAYS),
 };
 
 std::unordered_map<std::string, subhook::Hook> g_FunctionHooks;
@@ -425,8 +425,16 @@ inline void EmuInstallPatch(std::string FunctionName, xbaddr FunctionAddr)
 		return;
 	}
 
-	g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), (void*)patch.patchFunc);
-	printf("HLE: %s Patched\n", FunctionName.c_str());
+	// Currently use complete XAPI and OHCI plugin support (workaround until remaining extern HLE functions are done)
+	if ((patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) && *(void**)patch.patchFunc!= nullptr && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), *(void**)(patch.patchFunc))) {
+		printf("HLE: %s: Patched\n", FunctionName.c_str());
+		return;
+	} else if (!(patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), (void*)patch.patchFunc)) {
+		printf("HLE: %s: Patched\n", FunctionName.c_str());
+		return;
+	}
+
+	printf("HLE: %s: Skipped\n", FunctionName.c_str());
 }
 
 void EmuInstallPatches()

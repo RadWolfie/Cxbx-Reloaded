@@ -37,7 +37,7 @@
 #pragma once
 
 //#include <sstream> // for std::ostream
-//#include "EmuXTL.h"
+//#include "core/HLE/CommonHLE.h"
 #include "Logging.h"
 
 namespace XTL

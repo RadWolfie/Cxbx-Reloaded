@@ -49,7 +49,7 @@ namespace xboxkrnl {
 #include "CxbxKrnl/Emu.h"
 #include "CxbxKrnl/EmuFS.h"
 #include "CxbxKrnl/EmuShared.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "Common/Settings.hpp"
 
 

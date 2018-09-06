@@ -42,7 +42,7 @@
 #include "CxbxKrnl/CxbxKrnl.h"
 #include "CxbxKrnl/Emu.h"
 #include "CxbxKrnl/EmuFS.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "XbD3D8Types.h" // For X_D3DVSDE_*
 #include <sstream>
 #include <unordered_map>

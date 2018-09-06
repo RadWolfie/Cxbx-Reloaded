@@ -52,7 +52,7 @@ namespace xboxkrnl
 #include "CxbxKrnl.h" // For CxbxKrnl_TLS
 #include "Emu.h" // For EmuLog(LOG_PREFIX, LOG_LEVEL::WARNING, )
 #include "EmuFS.h" // For EmuGenerateFS
-#include "EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 
 // prevent name collisions
 namespace NtDll
