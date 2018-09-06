@@ -9,7 +9,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   Cxbx->Win32->CxbxKrnl->EmuXapi.cpp
+// *   core->HLE->XAPI->XbXapi.cpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -45,6 +45,7 @@ namespace xboxkrnl
 };
 
 #include "XbXapi.hpp"
+#include "OHCI/XbOHCI.hpp"
 #include "Common/Logging.h"
 
 _XTL_BEGIN
@@ -79,7 +80,7 @@ BOOL (WINAPI *HLE_XGetDeviceChanges)
 // ******************************************************************
 // * patch: XInputOpen
 // ******************************************************************
-HANDLE(WINAPI *HLE_XInputOpen)
+HANDLE (WINAPI *HLE_XInputOpen)
 (
 	IN PXPP_DEVICE_TYPE             DeviceType,
 	IN DWORD                        dwPort,
@@ -147,7 +148,7 @@ DWORD (WINAPI *HLE_XInputGetDeviceDescription)
 // ******************************************************************
 // * patch: SetThreadPriorityBoost
 // ******************************************************************
-extern BOOL (WINAPI *HLE_SetThreadPriorityBoost)
+BOOL (WINAPI *HLE_SetThreadPriorityBoost)
 (
 	HANDLE  hThread,
 	BOOL    DisablePriorityBoost
@@ -156,7 +157,7 @@ extern BOOL (WINAPI *HLE_SetThreadPriorityBoost)
 // ******************************************************************
 // * patch: SetThreadPriority
 // ******************************************************************
-extern BOOL (WINAPI *HLE_SetThreadPriority)
+BOOL (WINAPI *HLE_SetThreadPriority)
 (
 	HANDLE  hThread,
 	int     nPriority
@@ -166,7 +167,7 @@ extern BOOL (WINAPI *HLE_SetThreadPriority)
 // ******************************************************************
 // * patch: GetThreadPriority
 // ******************************************************************
-extern int (WINAPI *HLE_GetThreadPriority)
+int (WINAPI *HLE_GetThreadPriority)
 (
 	HANDLE  hThread
 );
@@ -174,7 +175,7 @@ extern int (WINAPI *HLE_GetThreadPriority)
 // ******************************************************************
 // * patch: GetExitCodeThread
 // ******************************************************************
-extern BOOL (WINAPI *HLE_GetExitCodeThread)
+BOOL (WINAPI *HLE_GetExitCodeThread)
 (
 	HANDLE  hThread,
 	LPDWORD lpExitCode
@@ -183,7 +184,7 @@ extern BOOL (WINAPI *HLE_GetExitCodeThread)
 // ******************************************************************
 // * patch: XapiThreadStartup
 // ******************************************************************
-extern VOID (WINAPI *HLE_XapiThreadStartup)
+VOID (WINAPI *HLE_XapiThreadStartup)
 (
 	DWORD dwDummy1,
 	DWORD dwDummy2
@@ -192,7 +193,7 @@ extern VOID (WINAPI *HLE_XapiThreadStartup)
 // ******************************************************************
 // * patch: XRegisterThreadNotifyRoutine
 // ******************************************************************
-extern VOID (WINAPI *HLE_XRegisterThreadNotifyRoutine)
+VOID (WINAPI *HLE_XRegisterThreadNotifyRoutine)
 (
 	PXTHREAD_NOTIFICATION   pThreadNotification,
 	BOOL                    fRegister
@@ -201,7 +202,7 @@ extern VOID (WINAPI *HLE_XRegisterThreadNotifyRoutine)
 // ******************************************************************
 // * patch: CreateFiber
 // ******************************************************************
-extern LPVOID (WINAPI *HLE_CreateFiber)
+LPVOID (WINAPI *HLE_CreateFiber)
 (
 	DWORD                   dwStackSize,
 	LPFIBER_START_ROUTINE   lpStartRoutine,
@@ -211,7 +212,7 @@ extern LPVOID (WINAPI *HLE_CreateFiber)
 // ******************************************************************
 // * patch: DeleteFiber
 // ******************************************************************
-extern VOID (WINAPI *HLE_DeleteFiber)
+VOID (WINAPI *HLE_DeleteFiber)
 (
 	LPVOID  lpFiber
 );
@@ -219,7 +220,7 @@ extern VOID (WINAPI *HLE_DeleteFiber)
 // ******************************************************************
 // * patch: SwitchToFiber
 // ******************************************************************
-extern VOID (WINAPI *HLE_SwitchToFiber)
+VOID (WINAPI *HLE_SwitchToFiber)
 (
 	LPVOID  lpFiber
 );
@@ -227,7 +228,7 @@ extern VOID (WINAPI *HLE_SwitchToFiber)
 // ******************************************************************
 // * patch: ConvertThreadToFiber
 // ******************************************************************
-extern LPVOID (WINAPI *HLE_ConvertThreadToFiber)
+LPVOID (WINAPI *HLE_ConvertThreadToFiber)
 (
 	LPVOID lpParameter
 );
@@ -235,7 +236,7 @@ extern LPVOID (WINAPI *HLE_ConvertThreadToFiber)
 // ******************************************************************
 // * patch: QueryPerformanceCounter
 // ******************************************************************
-extern BOOL (WINAPI *HLE_QueryPerformanceCounter)
+BOOL (WINAPI *HLE_QueryPerformanceCounter)
 (
 	LARGE_INTEGER * lpPerformanceCount
 );
@@ -243,7 +244,7 @@ extern BOOL (WINAPI *HLE_QueryPerformanceCounter)
 // ******************************************************************
 // * patch: QueueUserAPC
 // ******************************************************************
-extern DWORD (WINAPI *HLE_QueueUserAPC)
+DWORD (WINAPI *HLE_QueueUserAPC)
 (
 	PAPCFUNC    pfnAPC,
 	HANDLE      hThread,
@@ -253,7 +254,7 @@ extern DWORD (WINAPI *HLE_QueueUserAPC)
 // ******************************************************************
 // * patch: GetOverlappedResult
 // ******************************************************************
-extern BOOL (WINAPI *HLE_GetOverlappedResult)
+BOOL (WINAPI *HLE_GetOverlappedResult)
 (
 	HANDLE          hFile,
 	LPOVERLAPPED    lpOverlapped,
@@ -264,7 +265,7 @@ extern BOOL (WINAPI *HLE_GetOverlappedResult)
 // ******************************************************************
 // * patch: XLaunchNewImageA
 // ******************************************************************
-extern DWORD (WINAPI *HLE_XLaunchNewImageA)
+DWORD (WINAPI *HLE_XLaunchNewImageA)
 (
 	LPCSTR          lpTitlePath,
 	PLAUNCH_DATA    pLaunchData
@@ -273,7 +274,7 @@ extern DWORD (WINAPI *HLE_XLaunchNewImageA)
 // ******************************************************************
 // * patch: XGetLaunchInfo
 // ******************************************************************
-extern DWORD (WINAPI *HLE_XGetLaunchInfo)
+DWORD (WINAPI *HLE_XGetLaunchInfo)
 (
 	PDWORD          pdwLaunchDataType,
 	PLAUNCH_DATA    pLaunchData
@@ -282,7 +283,7 @@ extern DWORD (WINAPI *HLE_XGetLaunchInfo)
 // ******************************************************************
 // * patch: XSetProcessQuantumLength
 // ******************************************************************
-extern VOID (WINAPI *HLE_XSetProcessQuantumLength)
+VOID (WINAPI *HLE_XSetProcessQuantumLength)
 (
 	DWORD dwMilliseconds
 );
@@ -290,7 +291,7 @@ extern VOID (WINAPI *HLE_XSetProcessQuantumLength)
 // ******************************************************************
 // * patch: SignalObjectAndWait
 // ******************************************************************
-extern DWORD (WINAPI *HLE_SignalObjectAndWait)
+DWORD (WINAPI *HLE_SignalObjectAndWait)
 (
 	HANDLE  hObjectToSignal,
 	HANDLE  hObjectToWaitOn,
@@ -301,7 +302,7 @@ extern DWORD (WINAPI *HLE_SignalObjectAndWait)
 // ******************************************************************
 // * patch: timeSetEvent
 // ******************************************************************
-extern MMRESULT (WINAPI *HLE_timeSetEvent)
+MMRESULT (WINAPI *HLE_timeSetEvent)
 (
 	UINT            uDelay,
 	UINT            uResolution,
@@ -313,7 +314,7 @@ extern MMRESULT (WINAPI *HLE_timeSetEvent)
 // ******************************************************************
 // * patch: timeKillEvent
 // ******************************************************************
-extern MMRESULT (WINAPI *HLE_timeKillEvent)
+MMRESULT (WINAPI *HLE_timeKillEvent)
 (
 	UINT uTimerID
 );
@@ -321,7 +322,7 @@ extern MMRESULT (WINAPI *HLE_timeKillEvent)
 // ******************************************************************
 // * patch: RaiseException
 // ******************************************************************
-extern VOID (WINAPI *HLE_RaiseException)
+VOID (WINAPI *HLE_RaiseException)
 (
 	DWORD           dwExceptionCode,       // exception code
 	DWORD           dwExceptionFlags,      // continuable exception flag
@@ -332,7 +333,7 @@ extern VOID (WINAPI *HLE_RaiseException)
 // ******************************************************************
 // patch: XMountMUA
 // ******************************************************************
-extern DWORD (WINAPI *HLE_XMountMUA)
+DWORD (WINAPI *HLE_XMountMUA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,
@@ -342,7 +343,7 @@ extern DWORD (WINAPI *HLE_XMountMUA)
 // ******************************************************************
 // * patch: XMountMURootA
 // ******************************************************************
-extern DWORD (WINAPI *HLE_XMountMURootA)
+DWORD (WINAPI *HLE_XMountMURootA)
 (
 	DWORD dwPort,
 	DWORD dwSlot,
@@ -352,8 +353,9 @@ extern DWORD (WINAPI *HLE_XMountMURootA)
 // ******************************************************************
 // * patch: OutputDebugStringA
 // ******************************************************************
-extern VOID (WINAPI *HLE_OutputDebugStringA)
+VOID (WINAPI *HLE_OutputDebugStringA)
 (
 	IN LPCSTR lpOutputString
 );
+
 _XTL_END

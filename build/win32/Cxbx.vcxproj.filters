@@ -635,6 +635,9 @@
     <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.cpp">
       <Filter>core\HLE\XAPI\OHCI</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XapiPlugins.cpp">
+      <Filter>core\HLE\XAPI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resource\Splash.jpg">

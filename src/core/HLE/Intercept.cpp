@@ -46,7 +46,7 @@
 #include "CxbxKrnl/CxbxKrnl.h"
 #include "CxbxKrnl/Emu.h"
 #include "CxbxKrnl/EmuFS.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "CxbxKrnl/EmuShared.h"
 #include "Common/CxbxDebugger.h"
 #include "Logging.h"

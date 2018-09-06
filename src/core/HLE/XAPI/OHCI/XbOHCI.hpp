@@ -7,7 +7,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   src->core->HLE->XAPI->Xapi.h
+// *   src->core->HLE->XAPI->OHCI->XbOHCI.hpp
 // *
 // *  This file is part of the Cxbx project.
 // *

@@ -357,6 +357,7 @@
     <ClCompile Include="..\..\src\Common\XbePrinter.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\OHCIPlugins.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XAPI\OHCI\XInput\XInputPlugin.cpp" />
+    <ClCompile Include="..\..\src\core\HLE\XAPI\XapiPlugins.cpp" />
     <ClCompile Include="..\..\src\core\HLE\XAPI\XbXapi.cpp" />
     <ClCompile Include="..\..\src\CxbxKrnl\crc32c.cpp" />
     <ClCompile Include="..\..\src\core\HLE\D3D8\XbD3D8Logging.cpp" />

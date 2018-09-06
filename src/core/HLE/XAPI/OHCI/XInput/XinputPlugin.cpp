@@ -9,7 +9,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   Cxbx->Win32->CxbxKrnl->EmuXapi.cpp
+// *   core->HLE->XAPI->OHCI->XInput->XInputPlugin.cpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -44,12 +44,9 @@ namespace xboxkrnl
 	#include <xboxkrnl/xboxkrnl.h>
 };
 
-#include <Shlwapi.h>
 #include "CxbxKrnl/CxbxKrnl.h"
 #include "Logging.h"
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuKrnl.h" // For DefaultLaunchDataPage
-#include "CxbxKrnl/EmuFile.h"
 #include "CxbxKrnl/EmuFS.h"
 #include "core/HLE/CommonHLE.h"
 #include "CxbxKrnl/EmuShared.h"
@@ -267,8 +264,8 @@ _XTL_BEGIN
 // ******************************************************************
 VOID WINAPI EMUPATCH(XInitDevices)
 (
-    DWORD					dwPreallocTypeCount,
-	PXDEVICE_PREALLOC_TYPE	PreallocTypes
+	DWORD                   dwPreallocTypeCount,
+	PXDEVICE_PREALLOC_TYPE  PreallocTypes
 )
 {
 
@@ -387,7 +384,7 @@ bool TitleIsLegoSW()
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XGetDevices)
 (
-    PXPP_DEVICE_TYPE DeviceType
+	PXPP_DEVICE_TYPE DeviceType
 )
 {
 
@@ -434,9 +431,9 @@ DWORD WINAPI EMUPATCH(XGetDevices)
 // ******************************************************************
 BOOL WINAPI EMUPATCH(XGetDeviceChanges)
 (
-    PXPP_DEVICE_TYPE DeviceType,
-    PDWORD           pdwInsertions,
-    PDWORD           pdwRemovals
+	PXPP_DEVICE_TYPE DeviceType,
+	PDWORD           pdwInsertions,
+	PDWORD           pdwRemovals
 )
 {
 
@@ -507,10 +504,10 @@ BOOL WINAPI EMUPATCH(XGetDeviceChanges)
 // ******************************************************************
 HANDLE WINAPI EMUPATCH(XInputOpen)
 (
-    IN PXPP_DEVICE_TYPE             DeviceType,
-    IN DWORD                        dwPort,
-    IN DWORD                        dwSlot,
-    IN PX_XINPUT_POLLING_PARAMETERS   pPollingParameters OPTIONAL
+	IN PXPP_DEVICE_TYPE             DeviceType,
+	IN DWORD                        dwPort,
+	IN DWORD                        dwSlot,
+	IN PX_XINPUT_POLLING_PARAMETERS pPollingParameters OPTIONAL
 )
 {
 
@@ -617,7 +614,7 @@ HANDLE WINAPI EMUPATCH(XInputOpen)
 // ******************************************************************
 VOID WINAPI EMUPATCH(XInputClose)
 (
-    IN HANDLE hDevice
+	IN HANDLE hDevice
 )
 {
 
@@ -670,7 +667,7 @@ VOID WINAPI EMUPATCH(XInputClose)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XInputPoll)
 (
-    IN HANDLE hDevice
+	IN HANDLE hDevice
 )
 {
 
@@ -744,8 +741,8 @@ DWORD WINAPI EMUPATCH(XInputPoll)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XInputGetCapabilities)
 (
-    IN  HANDLE               hDevice,
-    OUT PX_XINPUT_CAPABILITIES pCapabilities
+	IN  HANDLE               hDevice,
+	OUT PX_XINPUT_CAPABILITIES pCapabilities
 )
 {
 
@@ -1024,8 +1021,8 @@ void EmuSBCGetState(XTL::PX_SBC_GAMEPAD pSBCGamepad, XTL::PX_XINPUT_GAMEPAD pXIG
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XInputGetState)
 (
-    IN  HANDLE         hDevice,
-    OUT PX_XINPUT_STATE  pState
+	IN  HANDLE         hDevice,
+	OUT PX_XINPUT_STATE  pState
 )
 {
 
@@ -1115,8 +1112,8 @@ DWORD WINAPI EMUPATCH(XInputGetState)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XInputSetState)
 (
-    IN     HANDLE           hDevice,
-    IN OUT PX_XINPUT_FEEDBACK pFeedback
+	IN     HANDLE           hDevice,
+	IN OUT PX_XINPUT_FEEDBACK pFeedback
 )
 {
 
@@ -1247,9 +1244,9 @@ DWORD WINAPI EMUPATCH(XInputSetState)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XMountMUA)
 (
-	DWORD dwPort,                  
-	DWORD dwSlot,                  
-	PCHAR pchDrive               
+	DWORD dwPort,
+	DWORD dwSlot,
+	PCHAR pchDrive
 )
 {
 
@@ -1286,8 +1283,8 @@ DWORD WINAPI EMUPATCH(XGetDeviceEnumerationStatus)()
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XInputGetDeviceDescription)
 (
-    HANDLE	hDevice,
-    PVOID	pDescription
+	HANDLE  hDevice,
+	PVOID   pDescription
 )
 {
 
@@ -1309,9 +1306,9 @@ DWORD WINAPI EMUPATCH(XInputGetDeviceDescription)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XMountMURootA)
 (
-	DWORD dwPort,                  
-	DWORD dwSlot,                  
-	PCHAR pchDrive               
+	DWORD dwPort,
+	DWORD dwSlot,
+	PCHAR pchDrive
 )
 {
 
@@ -1329,6 +1326,9 @@ DWORD WINAPI EMUPATCH(XMountMURootA)
 }
 #endif
 
+// ******************************************************************
+// * Initialize XInput Plugin
+// ******************************************************************
 void init_xapi_ohci_plugin_xinput()
 {
 	HLE_XGetDeviceChanges = EMUPATCH(XGetDeviceChanges);

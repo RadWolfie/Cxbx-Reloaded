@@ -38,7 +38,7 @@
 #define LOG_PREFIX CXBXR_MODULE::XINP
 
 #include "CxbxKrnl/Emu.h"
-#include "CxbxKrnl/EmuXTL.h"
+#include "core/HLE/CommonHLE.h"
 #include "CxbxKrnl/EmuShared.h"
 #include "XInput.h"
 

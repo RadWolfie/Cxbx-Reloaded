@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 // ******************************************************************
 // *
 // *    .,-:::::    .,::      .::::::::.    .,::      .:
@@ -7,7 +9,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   src->core->HLE->XAPI->XapiPlugins.h
+// *   core->HLE->XAPI->XapiPlugins.cpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -26,23 +28,51 @@
 // *  If not, write to the Free Software Foundation, Inc.,
 // *  59 Temple Place - Suite 330, Bostom, MA 02111-1307, USA.
 // *
-// *  (c) RadWolfie
+// *  (c) 2018 RadWolfie
 // *
 // *  All rights reserved
 // *
 // ******************************************************************
-#ifndef XAPIPLUGINS_H
-#define XAPIPLUGINS_H
+#define _XBOXKRNL_DEFEXTRN_
 
-#include "XbXapi.hpp"
+#define LOG_PREFIX CXBXR_MODULE::XAPI
+
+#include "Logging.h"
+
+#include "XapiPlugins.h"
+#include "OHCI/OHCIPlugins.h"
 
 _XTL_BEGIN
 
-// XAPI plugins
-void init_xapi_plugins();
+// ******************************************************************
+// * Initialize XAPI plugins
+// ******************************************************************
+void init_xapi_plugins()
+{
+	// Set all XAPI, except OHCI, to nullptr by default
+	HLE_ConvertThreadToFiber = nullptr;
+	HLE_CreateFiber = nullptr;
+	HLE_DeleteFiber = nullptr;
+	HLE_GetExitCodeThread = nullptr;
+	HLE_GetThreadPriority = nullptr;
+	HLE_OutputDebugStringA = nullptr;
+	HLE_QueryPerformanceCounter = nullptr;
+	HLE_RaiseException = nullptr;
+	HLE_SetThreadPriority = nullptr;
+	HLE_SetThreadPriorityBoost = nullptr;
+	HLE_SignalObjectAndWait = nullptr;
+	HLE_SwitchToFiber = nullptr;
+	HLE_XMountMUA = nullptr;
+	HLE_XMountMURootA = nullptr;
+	HLE_XSetProcessQuantumLength = nullptr;
+	HLE_timeKillEvent = nullptr;
+	HLE_timeSetEvent = nullptr;
 
-// Xapi plugin
-void init_xapi_plugin();
+	// Check which plugin to use then initialize specific plugin.
+	init_xapi_plugin();
+
+	// Initialize OHCI plugins.
+	init_xapi_ohci_plugins();
+}
+
 _XTL_END
-
-#endif

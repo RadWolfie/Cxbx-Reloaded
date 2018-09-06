@@ -9,7 +9,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   src->core->HLE->XAPI->OHCI->XInput->DInput.cpp
+// *   src->core->HLE->XAPI->OHCI->OHCIPlugins.cpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -28,7 +28,7 @@
 // *  If not, write to the Free Software Foundation, Inc.,
 // *  59 Temple Place - Suite 330, Bostom, MA 02111-1307, USA.
 // *
-// *  (c) 2002-2003 Aaron Robinson <caustik@caustik.com>
+// *  (c) 2018 RadWolfie
 // *
 // *  All rights reserved
 // *
@@ -37,10 +37,6 @@
 
 #define LOG_PREFIX CXBXR_MODULE::OHCI
 
-#include "CxbxKrnl/Emu.h"
-#include "core/HLE/CommonHLE.h"
-#include "CxbxKrnl/EmuShared.h"
-#include "Common/Win32/DInputController.h"
 #include "Logging.h"
 
 #include "OHCIPlugins.h"
@@ -49,6 +45,20 @@ _XTL_BEGIN
 
 void init_xapi_ohci_plugins()
 {
+	// Set all OCHI to nullptr by default
+	HLE_XGetDeviceChanges = nullptr;
+	HLE_XGetDeviceEnumerationStatus = nullptr;
+	HLE_XGetDevices = nullptr;
+	HLE_XInitDevices = nullptr;
+	HLE_XInputClose = nullptr;
+	HLE_XInputGetCapabilities = nullptr;
+	HLE_XInputGetDeviceDescription = nullptr;
+	HLE_XInputGetState = nullptr;
+	HLE_XInputOpen = nullptr;
+	HLE_XInputPoll = nullptr;
+	HLE_XInputSetState = nullptr;
+
+	// Check which plugin to use then initialize specific plugin.
 	init_xapi_ohci_plugin_xinput();
 }
 

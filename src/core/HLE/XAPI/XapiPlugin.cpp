@@ -9,7 +9,7 @@
 // *  `88bo,__,o,    oP"``"Yo,  _88o,,od8P   oP"``"Yo,
 // *    "YUMMMMMP",m"       "Mm,""YUMMMP" ,m"       "Mm,
 // *
-// *   Cxbx->Win32->CxbxKrnl->EmuXapi.cpp
+// *   core->HLE->XAPI->XapiPlugin.cpp
 // *
 // *  This file is part of the Cxbx project.
 // *
@@ -37,30 +37,19 @@
 
 #define LOG_PREFIX CXBXR_MODULE::XAPI
 
-#undef FIELD_OFFSET     // prevent macro redefinition warnings
 /* prevent name collisions */
 namespace xboxkrnl
 {
 	#include <xboxkrnl/xboxkrnl.h>
 };
 
-#include <Shlwapi.h>
 #include "CxbxKrnl/CxbxKrnl.h"
 #include "Logging.h"
 #include "CxbxKrnl/Emu.h"
 #include "CxbxKrnl/EmuKrnl.h" // For DefaultLaunchDataPage
 #include "CxbxKrnl/EmuFile.h"
-#include "CxbxKrnl/EmuFS.h"
 #include "core/HLE/CommonHLE.h"
-#include "CxbxKrnl/EmuShared.h"
-#include "../Common/Win32/XBPortMapping.h"
 #include "core/HLE/Intercept.hpp"
-#include "CxbxVSBC/CxbxVSBC.h"
-#include "Windef.h"
-#include <vector>
-
-#include "XapiPlugins.h"
-#include "OHCI/OHCIPlugins.h"
 
 _XTL_BEGIN
 
@@ -69,8 +58,8 @@ _XTL_BEGIN
 // ******************************************************************
 BOOL WINAPI EMUPATCH(SetThreadPriorityBoost)
 (
-    HANDLE  hThread,
-    BOOL    DisablePriorityBoost
+	HANDLE  hThread,
+	BOOL    DisablePriorityBoost
 )
 {
 
@@ -93,8 +82,8 @@ BOOL WINAPI EMUPATCH(SetThreadPriorityBoost)
 // ******************************************************************
 BOOL WINAPI EMUPATCH(SetThreadPriority)
 (
-    HANDLE  hThread,
-    int     nPriority
+	HANDLE  hThread,
+	int     nPriority
 )
 {
 
@@ -118,7 +107,7 @@ BOOL WINAPI EMUPATCH(SetThreadPriority)
 // ******************************************************************
 int WINAPI EMUPATCH(GetThreadPriority)
 (
-    HANDLE  hThread
+	HANDLE  hThread
 )
 {
 
@@ -138,8 +127,8 @@ int WINAPI EMUPATCH(GetThreadPriority)
 // ******************************************************************
 BOOL WINAPI EMUPATCH(GetExitCodeThread)
 (
-    HANDLE  hThread,
-    LPDWORD lpExitCode
+	HANDLE  hThread,
+	LPDWORD lpExitCode
 )
 {
 
@@ -159,8 +148,8 @@ BOOL WINAPI EMUPATCH(GetExitCodeThread)
 // ******************************************************************
 VOID WINAPI EMUPATCH(XapiThreadStartup)
 (
-    DWORD dwDummy1,
-    DWORD dwDummy2
+	DWORD dwDummy1,
+	DWORD dwDummy2
 )
 {
 	LOG_FUNC_BEGIN
@@ -192,8 +181,8 @@ VOID WINAPI EMUPATCH(XapiThreadStartup)
 // ******************************************************************
 VOID WINAPI EMUPATCH(XRegisterThreadNotifyRoutine)
 (
-    PXTHREAD_NOTIFICATION   pThreadNotification,
-    BOOL                    fRegister
+	PXTHREAD_NOTIFICATION   pThreadNotification,
+	BOOL                    fRegister
 )
 {
 	LOG_FUNC_BEGIN
@@ -236,8 +225,8 @@ VOID WINAPI EMUPATCH(XRegisterThreadNotifyRoutine)
 }
 
 typedef struct {
-	LPFIBER_START_ROUTINE	lpStartRoutine;
-	LPVOID					lpParameter;
+	LPFIBER_START_ROUTINE   lpStartRoutine;
+	LPVOID                  lpParameter;
 } fiber_context_t;
 
 void WINAPI EmuFiberStartup(fiber_context_t* context)
@@ -258,9 +247,9 @@ void WINAPI EmuFiberStartup(fiber_context_t* context)
 // ******************************************************************
 LPVOID WINAPI EMUPATCH(CreateFiber)
 (
-	DWORD					dwStackSize,
-	LPFIBER_START_ROUTINE	lpStartRoutine,
-	LPVOID					lpParameter
+	DWORD                   dwStackSize,
+	LPFIBER_START_ROUTINE   lpStartRoutine,
+	LPVOID                  lpParameter
 )
 {
 
@@ -286,7 +275,7 @@ LPVOID WINAPI EMUPATCH(CreateFiber)
 // ******************************************************************
 VOID WINAPI EMUPATCH(DeleteFiber)
 (
-	LPVOID					lpFiber
+	LPVOID                  lpFiber
 )
 {
 
@@ -300,7 +289,7 @@ VOID WINAPI EMUPATCH(DeleteFiber)
 // ******************************************************************
 VOID WINAPI EMUPATCH(SwitchToFiber)
 (
-	LPVOID lpFiber 
+	LPVOID lpFiber
 )
 {
 
@@ -344,9 +333,9 @@ BOOL WINAPI EMUPATCH(QueryPerformanceCounter)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(QueueUserAPC)
 (
-	PAPCFUNC	pfnAPC,
-	HANDLE		hThread,
-	DWORD		dwData
+	PAPCFUNC    pfnAPC,
+	HANDLE      hThread,
+	DWORD       dwData
 )
 {
 	LOG_FUNC_BEGIN
@@ -377,10 +366,10 @@ DWORD WINAPI EMUPATCH(QueueUserAPC)
 // ******************************************************************
 BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 (
-	HANDLE			hFile,
-	LPOVERLAPPED	lpOverlapped,
-	LPDWORD			lpNumberOfBytesTransferred,
-	BOOL			bWait
+	HANDLE          hFile,
+	LPOVERLAPPED    lpOverlapped,
+	LPDWORD         lpNumberOfBytesTransferred,
+	BOOL            bWait
 )
 {
 	LOG_FUNC_BEGIN
@@ -404,8 +393,8 @@ BOOL WINAPI XTL::EMUPATCH(GetOverlappedResult)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XLaunchNewImageA)
 (
-	LPCSTR			lpTitlePath,
-	PLAUNCH_DATA	pLaunchData
+	LPCSTR          lpTitlePath,
+	PLAUNCH_DATA    pLaunchData
 )
 {
 	// Note : This can be tested using "Innocent tears",
@@ -456,7 +445,7 @@ DWORD WINAPI EMUPATCH(XLaunchNewImageA)
 			if (rootDevice != nullptr)
 				sprintf(szDashboardPath, "%s\\xboxdash.xbe", rootDevice->HostDevicePath.c_str());
 
-			if (PathFileExists(szDashboardPath))
+			if (std::experimental::filesystem::exists(szDashboardPath))
 			{
 				MessageBox(CxbxKrnl_hEmuParent, "The title is rebooting to dashboard", "Cxbx-Reloaded", 0);
 				lpTitlePath = "C:\\xboxdash.xbe";
@@ -487,8 +476,8 @@ DWORD WINAPI EMUPATCH(XLaunchNewImageA)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(XGetLaunchInfo)
 (
-	PDWORD			pdwLaunchDataType,
-	PLAUNCH_DATA	pLaunchData
+	PDWORD          pdwLaunchDataType,
+	PLAUNCH_DATA    pLaunchData
 )
 {
 
@@ -537,7 +526,7 @@ DWORD WINAPI EMUPATCH(XGetLaunchInfo)
 // ******************************************************************
 VOID WINAPI EMUPATCH(XSetProcessQuantumLength)
 (
-    DWORD dwMilliseconds
+	DWORD dwMilliseconds
 )
 {
 
@@ -552,10 +541,10 @@ VOID WINAPI EMUPATCH(XSetProcessQuantumLength)
 // ******************************************************************
 DWORD WINAPI EMUPATCH(SignalObjectAndWait)
 (
-	HANDLE	hObjectToSignal,
-	HANDLE	hObjectToWaitOn,
-	DWORD	dwMilliseconds,
-	BOOL	bAlertable
+	HANDLE  hObjectToSignal,
+	HANDLE  hObjectToWaitOn,
+	DWORD   dwMilliseconds,
+	BOOL    bAlertable
 )
 {
 
@@ -576,11 +565,11 @@ DWORD WINAPI EMUPATCH(SignalObjectAndWait)
 // ******************************************************************
 MMRESULT WINAPI EMUPATCH(timeSetEvent)
 (
-	UINT			uDelay,
-	UINT			uResolution,
-	LPTIMECALLBACK	fptc,
-	DWORD			dwUser,
-	UINT			fuEvent
+	UINT            uDelay,
+	UINT            uResolution,
+	LPTIMECALLBACK  fptc,
+	DWORD           dwUser,
+	UINT            fuEvent
 )
 {
 
@@ -603,7 +592,7 @@ MMRESULT WINAPI EMUPATCH(timeSetEvent)
 // ******************************************************************
 MMRESULT WINAPI EMUPATCH(timeKillEvent)
 (
-	UINT uTimerID  
+	UINT uTimerID
 )
 {
 
@@ -620,10 +609,10 @@ MMRESULT WINAPI EMUPATCH(timeKillEvent)
 // ******************************************************************
 VOID WINAPI EMUPATCH(RaiseException)
 (
-	DWORD			dwExceptionCode,       // exception code
-	DWORD			dwExceptionFlags,      // continuable exception flag
-	DWORD			nNumberOfArguments,    // number of arguments
-	CONST ULONG_PTR *lpArguments		   // array of arguments
+	DWORD           dwExceptionCode,       // exception code
+	DWORD           dwExceptionFlags,      // continuable exception flag
+	DWORD           nNumberOfArguments,    // number of arguments
+	CONST ULONG_PTR *lpArguments           // array of arguments
 )
 {
 
@@ -703,16 +692,6 @@ VOID WINAPI EMUPATCH(OutputDebugStringA)
 }
 
 // ******************************************************************
-// * Initialize XAPI plugins
-// ******************************************************************
-void init_xapi_plugins()
-{
-	init_xapi_plugin();
-
-	init_xapi_ohci_plugin_xinput();
-}
-
-// ******************************************************************
 // * Initialize Xapi Plugin
 // ******************************************************************
 void init_xapi_plugin()
@@ -734,7 +713,5 @@ void init_xapi_plugin()
 	HLE_XSetProcessQuantumLength = EMUPATCH(XSetProcessQuantumLength);
 	HLE_timeKillEvent = EMUPATCH(timeKillEvent);
 	HLE_timeSetEvent = EMUPATCH(timeSetEvent);
-
-	init_xapi_ohci_plugin_xinput();
 }
 _XTL_END
