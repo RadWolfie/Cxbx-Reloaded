@@ -703,9 +703,19 @@ VOID WINAPI EMUPATCH(OutputDebugStringA)
 }
 
 // ******************************************************************
-// * Plugin functions
+// * Initialize XAPI plugins
 // ******************************************************************
 void init_xapi_plugins()
+{
+	init_xapi_plugin();
+
+	init_xapi_ohci_plugin_xinput();
+}
+
+// ******************************************************************
+// * Initialize Xapi Plugin
+// ******************************************************************
+void init_xapi_plugin()
 {
 	HLE_ConvertThreadToFiber = EMUPATCH(ConvertThreadToFiber);
 	HLE_CreateFiber = EMUPATCH(CreateFiber);

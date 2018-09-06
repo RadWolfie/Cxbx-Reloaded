@@ -40,6 +40,7 @@
 #include "core/HLE/CommonHLE.h"
 #include "Patches.hpp"
 #include "Intercept.hpp"
+#include "XAPI/XapiPlugins.h"
 
 #include <map>
 #include <unordered_map>
@@ -426,10 +427,10 @@ inline void EmuInstallPatch(std::string FunctionName, xbaddr FunctionAddr)
 	}
 
 	// Currently use complete XAPI and OHCI plugin support (workaround until remaining extern HLE functions are done)
-	if ((patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) && *(void**)patch.patchFunc!= nullptr && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), *(void**)(patch.patchFunc))) {
+	if ((patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) > 0 && *(void**)patch.patchFunc!= nullptr && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), *(void**)(patch.patchFunc))) {
 		printf("HLE: %s: Patched\n", FunctionName.c_str());
 		return;
-	} else if (!(patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), (void*)patch.patchFunc)) {
+	} else if ((patch.flags & (PATCH_HLE_OHCI | PATCH_ALWAYS)) == 0 && g_FunctionHooks[FunctionName].Install((void*)(FunctionAddr), (void*)patch.patchFunc)) {
 		printf("HLE: %s: Patched\n", FunctionName.c_str());
 		return;
 	}
@@ -439,6 +440,8 @@ inline void EmuInstallPatch(std::string FunctionName, xbaddr FunctionAddr)
 
 void EmuInstallPatches()
 {
+	XTL::init_xapi_plugins();
+
 	for (const auto& it : g_SymbolAddresses) {
 		EmuInstallPatch(it.first, it.second);
 	}
