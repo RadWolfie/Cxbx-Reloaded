@@ -665,6 +665,7 @@ BEGIN
             POPUP "&LLE",                           65535,MFT_STRING,MFS_ENABLED
             BEGIN
                 MENUITEM "LLE &GPU",                    ID_EMULATION_LLE_GPU,MFT_STRING,MFS_GRAYED
+                MENUITEM "LLE &APU",                    ID_EMULATION_LLE_APU,MFT_STRING,MFS_ENABLED
             END
         END
         POPUP "Hacks",                          65535,MFT_STRING,MFS_ENABLED
