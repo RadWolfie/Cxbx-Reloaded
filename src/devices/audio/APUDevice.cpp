@@ -94,6 +94,7 @@ uint32_t APUDevice::MMIORead(int barIndex, uint32_t addr, unsigned size)
 
 	switch (addr) {
 		case 0x200C: return GetAPUTime();
+
 	}
 
 	printf("APUDevice: Unimplemented MMIORead %X\n", addr);
