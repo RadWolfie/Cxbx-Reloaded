@@ -20,6 +20,7 @@
 // *  59 Temple Place - Suite 330, Bostom, MA 02111-1307, USA.
 // *
 // *  (c) 2018 Luke Usher <luke.usher@outlook.coM>
+// *  (c) 2019 RadWolfie
 // *
 // *  All rights reserved
 // *
@@ -58,11 +59,26 @@ void AC97Device::IOWrite(int barIndex, uint32_t addr, uint32_t value, unsigned s
 
 uint32_t AC97Device::MMIORead(int barIndex, uint32_t addr, unsigned size)
 {
+	switch (addr) {
+		case 0x130:
+			return reinterpret_cast<uint32_t*>(AC97_state_buffer)[0x130 >> 2];
+	}
+
 	printf("AC97Device: Unimplemented MMIORead %X\n", addr);
 	return 0;
 }
 
 void AC97Device::MMIOWrite(int barIndex, uint32_t addr, uint32_t value, unsigned size)
 {
+	switch (addr) {
+		case 0x12C:
+			switch (value) {
+				case 2: // Perform reset
+					reinterpret_cast<uint32_t*>(AC97_state_buffer)[0x130 >> 2] = 0x100;
+					return;
+			}
+			break;
+	}
+
 	printf("AC97Device: Unimplemented MMIOWrite %X\n", addr);
 }

@@ -33,6 +33,8 @@ class AC97Device : public PCIDevice {
 	public:
 		using PCIDevice::PCIDevice;
 
+		uint8_t AC97_state_buffer[AC97_SIZE];
+
 		// PCI Functions
 		void Init();
 		void Reset();
