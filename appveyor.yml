@@ -24,11 +24,12 @@ before_build:
 build_script:
   - cmd: powershell -Command "MSBuild Cxbx-Reloaded.sln /p:Platform=win32 /p:Configuration=%CONFIGURATION% /m"
 
-on_success:
+after_build:
   - cmd: |-
       cd bin\%CONFIGURATION%
+      7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip ..\..\COPYING ..\..\README.md
       7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip Cxbx.exe glew32.dll subhook.dll CxbxVSBC.dll
-      7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip CxbxDebugger.exe capstone.dll cs_x86.dll
+      7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip cxbxr-debugger.exe capstone.dll cs_x86.dll
 
 artifacts:
   - path: export/*.zip
