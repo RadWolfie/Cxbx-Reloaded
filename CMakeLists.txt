@@ -31,6 +31,29 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/import/cs_x86")
 # Cxbx-Reloaded projects
 set(CXBXR_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+find_package(Git)
+
+if(Git_FOUND)
+ message("Git found: ${GIT_EXECUTABLE}")
+
+ execute_process(
+  COMMAND git describe --always --tags --first-parent
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE _GIT_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+ )
+
+ message("Git version: " ${_GIT_VERSION})
+else()
+ set(_GIT_VERSION "unknown")
+endif()
+
+# Appears to update whenever define has changed.
+configure_file(
+ "${CXBXR_ROOT_DIR}/src/version.h.in" "${CMAKE_BINARY_DIR}/verison.h" @ONLY
+ NEWLINE_STYLE LF
+)
+
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/projects/vsbc")
 
 # For now, split the files into group for which project
@@ -72,6 +95,8 @@ file (GLOB CXBXR_HEADER_COMMON
  "${CXBXR_ROOT_DIR}/src/Cxbx.h"
  "${CXBXR_ROOT_DIR}/src/CxbxVersion.h"
 )
+
+file(GLOB CXBXR_GIT_VERSION_H "${CMAKE_BINARY_DIR}/verison.h")
 
 # GUI v1
 file (GLOB CXBXR_HEADER_GUIv1

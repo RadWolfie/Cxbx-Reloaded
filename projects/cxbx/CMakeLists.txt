@@ -66,6 +66,8 @@ source_group(TREE ${CXBXR_ROOT_DIR}/src PREFIX source FILES
 
 source_group(TREE ${CXBXR_ROOT_DIR} FILES ${RESOURCES})
 
+source_group(TREE ${Cxbx-Reloaded_BINARY_DIR} PREFIX header FILES ${CXBXR_GIT_VERSION_H})
+
 add_executable(cxbx WIN32 ${RESOURCES}
  ${CXBXR_HEADER_GUIv1}
  ${CXBXR_HEADER_COMMON}
@@ -73,9 +75,10 @@ add_executable(cxbx WIN32 ${RESOURCES}
  ${CXBXR_SOURCE_GUIv1}
  ${CXBXR_SOURCE_COMMON}
  ${CXBXR_SOURCE_EMU}
+ ${CXBXR_GIT_VERSION_H}
 )
 
-# Link flags
+# Link and compile flags
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 
  set_target_properties(cxbx PROPERTIES
@@ -137,3 +140,10 @@ target_link_libraries(cxbx
 )
 
 add_dependencies(cxbx cxbxr-debugger)
+
+set(CXBXR_GLEW_DLL "${CXBXR_ROOT_DIR}/import/glew-2.0.0/bin/Release/Win32/glew32.dll")
+
+# Copy glew32.dll to build type's folder after build.
+add_custom_command(TARGET cxbx POST_BUILD
+ COMMAND ${CMAKE_COMMAND} -E copy ${CXBXR_GLEW_DLL} $<TARGET_FILE_DIR:cxbx>
+)
