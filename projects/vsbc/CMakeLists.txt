@@ -34,3 +34,7 @@ source_group(TREE ${CXBXR_ROOT_DIR}/src/vsbc PREFIX header FILES ${HEADERS})
 source_group(TREE ${CXBXR_ROOT_DIR}/src/vsbc PREFIX source FILES ${SOURCES})
 
 add_library(vsbc SHARED ${HEADERS} ${SOURCES})
+
+set_target_properties(vsbc PROPERTIES
+ OUTPUT_NAME CxbxVSBC
+)
