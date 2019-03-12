@@ -6,7 +6,7 @@
 *.aps
 
 #Test files
-src/Version.h
+src/[Vv]ersion.h
 *.xbe
 
 # Last known git hash
