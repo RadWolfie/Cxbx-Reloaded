@@ -66,8 +66,6 @@ source_group(TREE ${CXBXR_ROOT_DIR}/src PREFIX source FILES
 
 source_group(TREE ${CXBXR_ROOT_DIR} FILES ${RESOURCES})
 
-source_group(TREE ${Cxbx-Reloaded_BINARY_DIR} PREFIX header FILES ${CXBXR_GIT_VERSION_H})
-
 add_executable(cxbx WIN32 ${RESOURCES}
  ${CXBXR_HEADER_GUIv1}
  ${CXBXR_HEADER_COMMON}

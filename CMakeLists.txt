@@ -50,7 +50,7 @@ endif()
 
 # Appears to update whenever define has changed.
 configure_file(
- "${CXBXR_ROOT_DIR}/src/version.h.in" "${CMAKE_BINARY_DIR}/verison.h" @ONLY
+ "${CXBXR_ROOT_DIR}/src/version.h.in" "${CXBXR_ROOT_DIR}/src/version.h" @ONLY
  NEWLINE_STYLE LF
 )
 
@@ -94,9 +94,8 @@ file (GLOB CXBXR_HEADER_COMMON
  "${CXBXR_ROOT_DIR}/src/common/xdvdfs-tools/xdvdfs.h"
  "${CXBXR_ROOT_DIR}/src/Cxbx.h"
  "${CXBXR_ROOT_DIR}/src/CxbxVersion.h"
+ "${CXBXR_ROOT_DIR}/src/version.h"
 )
-
-file(GLOB CXBXR_GIT_VERSION_H "${CMAKE_BINARY_DIR}/verison.h")
 
 # GUI v1
 file (GLOB CXBXR_HEADER_GUIv1
