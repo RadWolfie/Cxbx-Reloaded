@@ -27,7 +27,7 @@ build_script:
 after_build:
   - cmd: |-
       cd bin\%CONFIGURATION%
-      7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip ..\..\COPYING ..\..\README.md
+      7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip ..\..\..\COPYING ..\..\..\README.md
       7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip Cxbx.exe glew32.dll subhook.dll CxbxVSBC.dll
       7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip cxbxr-debugger.exe capstone.dll cs_x86.dll
 
