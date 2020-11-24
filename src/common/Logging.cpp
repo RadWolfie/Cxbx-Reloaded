@@ -112,8 +112,33 @@ const char log_error[] = "ERROR: ";
 const char log_fatal[] = "FATAL: ";
 const char log_unkwn[] = "???? : ";
 
+bool EmuLogFormatMessage(std::vector<char>& message_output, const char* format_input, const va_list argp)
+{
+	va_list argp_copy;
+
+	// Allocate a sufficient buffer to hold the formatted string.
+	// We make a copy of the argument structure, this prevents issues
+	// as the call to vsnprintf will modify the va_list.
+	va_copy(argp_copy, argp);
+	// allocate predicted buffer size then write to buffer afterward.
+	size_t log_fmt_size = 1 + std::vsnprintf(nullptr, 0, format_input, argp_copy);
+	va_end(argp_copy);
+	if (message_output.size() < log_fmt_size) {
+		message_output.resize(log_fmt_size);
+	}
+	if (message_output.size() <= log_fmt_size) {
+		std::vsnprintf(message_output.data(), log_fmt_size, format_input, argp);
+		return true;
+	}
+
+	// Prevent a crash if we can't allocate enough memory.
+	// We want this to be transparent to the running Xbox application.
+	return false;
+}
+
 // Do not use EmuLogOutput function outside of this file.
-void EmuLogOutput(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szWarningMessage, const va_list argp)
+thread_local std::vector<char> output_message;
+void EmuLogOutput(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szMessage, const va_list argp)
 {
 	LOG_THREAD_INIT;
 
@@ -139,27 +164,32 @@ void EmuLogOutput(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szWarn
 			break;
 	}
 
-	std::cout << _logThreadPrefix << level_str
-		<< g_EnumModules2String[to_underlying(cxbxr_module)];
+	va_list argp_copy;
+	va_copy(argp_copy, argp);
+	// allocate predicted buffer size then write to buffer afterward.
+	bool bRet = EmuLogFormatMessage(output_message, szMessage, argp_copy);
+	va_end(argp_copy);
 
-	vfprintf(stdout, szWarningMessage, argp);
-
-	fprintf(stdout, "\n");
-
-	fflush(stdout);
+	if (bRet) {
+		std::stringstream ss;
+		ss << _logThreadPrefix << level_str
+			<< g_EnumModules2String[to_underlying(cxbxr_module)] << " " << output_message.data() << "\n";
+		std::cout << ss.str();
+	}
 }
-inline void EmuLogOutputEx(const CXBXR_MODULE cxbxr_module, const LOG_LEVEL level, const char *szWarningMessage, ...)
+
+inline void EmuLogOutputEx(const CXBXR_MODULE cxbxr_module, const LOG_LEVEL level, const char *szMessage, ...)
 {
 	va_list argp;
-	va_start(argp, szWarningMessage);
-	EmuLogOutput(cxbxr_module, level, szWarningMessage, argp);
+	va_start(argp, szMessage);
+	EmuLogOutput(cxbxr_module, level, szMessage, argp);
 	va_end(argp);
 }
 
 // print out a custom message to the console or kernel debug log file
-void NTAPI EmuLogEx(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szWarningMessage, ...)
+void EmuLogEx(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szMessage, ...)
 {
-	if (szWarningMessage == NULL) {
+	if (szMessage == NULL) {
 		return;
 	}
 
@@ -169,25 +199,25 @@ void NTAPI EmuLogEx(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szWa
 			LOG_THREAD_INIT;
 
 			va_list argp;
-			va_start(argp, szWarningMessage);
+			va_start(argp, szMessage);
 
-			EmuLogOutput(cxbxr_module, level, szWarningMessage, argp);
+			EmuLogOutput(cxbxr_module, level, szMessage, argp);
 
 			va_end(argp);
 		}
 	}
 }
 
-void NTAPI EmuLogInit(LOG_LEVEL level, const char *szWarningMessage, ...)
+void EmuLogInit(LOG_LEVEL level, const char *szMessage, ...)
 {
-	if (szWarningMessage == NULL) {
+	if (szMessage == NULL) {
 		return;
 	}
 
 	va_list argp;
-	va_start(argp, szWarningMessage);
+	va_start(argp, szMessage);
 
-	EmuLogOutput(CXBXR_MODULE::INIT, level, szWarningMessage, argp);
+	EmuLogOutput(CXBXR_MODULE::INIT, level, szMessage, argp);
 
 	va_end(argp);
 }

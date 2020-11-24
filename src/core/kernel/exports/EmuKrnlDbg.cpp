@@ -101,33 +101,17 @@ XBSYSAPI EXPORTNUM(8) xbox::ulong_xt _cdecl xbox::DbgPrint
 		LOG_FUNC_ARG("...")
 		LOG_FUNC_END;
 
-	if (Format != NULL) {
-		va_list argp, argp_copy;
+	if (Format != nullptr) {
+		va_list argp;
 		va_start(argp, Format);
-
-		// Allocate a sufficient buffer to hold the formatted string
-		// We make a copy of the argument structure, this prevents issues
-		// as the call to vsnprintf will modify the va_list.
-		va_copy(argp_copy, argp);
-		auto size = vsnprintf(nullptr, 0, Format, argp_copy);
-		va_end(argp_copy);
-
-        auto buffer = (char*)malloc(size);
-        if (buffer == nullptr) {
-            // Prevent a crash if we can't allocate enough memory
-            // We want this to be transparent to the running Xbox application
-            // Hence, we return success.
-            return xbox::status_success;
-        }
-
-        // Perform the actual print operation
-		vsnprintf(buffer, size, Format, argp);
+		static std::vector<char> message;
+		bool bRet = EmuLogFormatMessage(message, Format, argp);
 		va_end(argp);
 
 		// Allow DbgPrint to be disabled
-		EmuLog(LOG_LEVEL::INFO, "%s", buffer);
-		free(buffer);
-		fflush(stdout);
+		if (bRet) {
+			EmuLog(LOG_LEVEL::INFO, "%s", message.data());
+		}
 	}
 
 	RETURN(xbox::status_success);

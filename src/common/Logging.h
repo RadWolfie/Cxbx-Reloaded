@@ -118,9 +118,11 @@ extern const char* g_EnumModules2String[to_underlying(CXBXR_MODULE::MAX)];
 extern std::atomic_int g_CurrentLogLevel;
 extern std::atomic_bool g_CurrentLogPopupTestCase;
 
+bool EmuLogFormatMessage(std::vector<char>& message_output, const char* format_input, const va_list argp);
+
 // print out a log message to the console or kernel debug log file if level is high enough
-void NTAPI EmuLogEx(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szWarningMessage, ...);
-void NTAPI EmuLogInit(LOG_LEVEL level, const char *szWarningMessage, ...);
+void EmuLogEx(CXBXR_MODULE cxbxr_module, LOG_LEVEL level, const char *szMessage, ...);
+void EmuLogInit(LOG_LEVEL level, const char *szMessage, ...);
 
 #define EmuLog(level, fmt, ...) EmuLogEx(LOG_PREFIX, level, fmt, ##__VA_ARGS__)
 
@@ -348,7 +350,7 @@ extern thread_local std::string _logThreadPrefix;
 	static thread_local std::string _logFuncPrefix; \
 	if (_logFuncPrefix.length() == 0) {	\
 		std::stringstream tmp; \
-		tmp << g_EnumModules2String[to_underlying(LOG_PREFIX)] << (func != nullptr ? remove_emupatch_prefix(func) : ""); \
+		tmp << g_EnumModules2String[to_underlying(LOG_PREFIX)] << " " << (func != nullptr ? remove_emupatch_prefix(func) : ""); \
 		_logFuncPrefix = tmp.str(); \
 	}
 
@@ -551,7 +553,8 @@ extern thread_local std::string _logThreadPrefix;
 // Macro's for Flags-ToString conversions :
 #define FLAGS2STR_HEADER(FlagType) LOGRENDER_HEADER_BY_REF(FlagType);
 #define FLAGS2STR_START(FlagType) std::string TYPE2PCHAR(FlagType)(const FlagType &value) { std::stringstream ss;
-#define FLAG2STR(f) if (((uint32_t)value & f) == f) ss << #f << "|";
+#define FLAG2STR(f) if (((uint32_t)value & f) != 0) ss << #f << "|"; \
+                    else if ((uint32_t)value == f) ss << #f << "|";
 #define FLAG2STR_MASK(f) ss << #f"=" << (value & f) << "|";
 #define FLAGS2STR_END std::string res = ss.str(); if (!res.empty()) res.pop_back(); return res; }
 #define FLAGS2STR_END_and_LOGRENDER(FlagType) FLAGS2STR_END LOGRENDER_TYPE(FlagType)
