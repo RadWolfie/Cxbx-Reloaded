@@ -1,3 +1,5 @@
+name: Fork Sync
+
 on:
   workflow_dispatch:
 
