@@ -1,0 +1,21 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  upstream_sync:
+    runs-on: ubuntu-latest
+    name: Sync master with upstream latest
+
+    steps:
+    - name: Checkout master
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        
+    - name: Pull upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v2.2
+      with:
+        upstream_repository: Cxbx-Reloaded/Cxbx-Reloaded
+        upstream_branch: master
+        target_branch: master
