@@ -1,0 +1,57 @@
+name: Fork Remote
+
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: 'git command (excluding git)'
+        default: 'rebase origin/master'
+      branch_target:
+        description: 'Target branch'
+        default: ''
+        require: true
+      branch_base:
+        description: 'Base branch'
+        default: 'master'
+        require: true
+      git_push_args:
+        description: 'git push args'
+        default: '--force'
+        require: true
+      git_pull_rebase_config:
+        description: 'git pull rebase config'
+        default: 'true'
+        require: true
+
+jobs:
+  fork_remote:
+    runs-on: ubuntu-latest
+    name: Run User Command Remotely
+
+    steps:
+      - name: Setup git as User
+        run: |
+          git config --global user.name ${{ github.actor }}
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          git config --global pull.rebase '${{ github.event.inputs.git_pull_rebase_config }}'
+          
+      - name: Checkout ${{ github.event.inputs.branch_base }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch_base }}
+          fetch-depth: 0
+          token: ${{ secrets.FORK_TOKEN }}
+
+      - name: Checkout ${{ github.event.inputs.branch_target }}
+        if: github.event.inputs.branch_base != github.event.inputs.branch_target
+        run: git checkout ${{ github.event.inputs.branch_target }}
+
+      - name: Run User Command
+        run: |
+          git ${{ github.event.inputs.cmd }}
+          exit $?
+
+      - name: Push
+        run: | 
+          git push ${{ github.event.inputs.git_push_args }} origin ${{ github.event.inputs.branch_target }}
+          exit $?
