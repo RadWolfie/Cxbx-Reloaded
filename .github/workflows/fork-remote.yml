@@ -48,7 +48,7 @@ jobs:
 
       - name: Run User Command
         run: |
-          git ${{ github.event.inputs.cmd }}
+          ${{ github.event.inputs.cmd }}
           exit $?
 
       - name: Push
