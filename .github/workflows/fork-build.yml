@@ -1,0 +1,40 @@
+name: Fork Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_target:
+        description: 'Target branch'
+        default: 'master'
+        require: true
+
+jobs:
+  fork-build:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Release]
+        vsver: [VS2019]
+    steps:
+      - name: Checkout ${{ github.event.inputs.branch_target }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch_target }}
+          submodules: recursive
+      - name: Generate cmake files
+        run: |
+          mkdir build && cd build
+          cmake .. -A Win32
+      - name: Build
+        working-directory: build
+        run: cmake --build . --config ${{ matrix.configuration }} -j $env:NUMBER_OF_PROCESSORS
+      - name: Prepare artifacts
+        if: matrix.configuration == 'Release'
+        working-directory: build
+        run: cmake --install . --config ${{ matrix.configuration }} --prefix ../artifacts
+      - uses: actions/upload-artifact@v2
+        if: matrix.configuration == 'Release'
+        with:
+          name: cxbxr-windows
+          path: artifacts/bin/**
