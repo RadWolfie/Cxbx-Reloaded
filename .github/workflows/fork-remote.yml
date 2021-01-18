@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       cmd:
-        description: 'git command (excluding git)'
-        default: 'rebase origin/master'
+        description: 'command'
+        default: 'git rebase origin/master'
       branch_target:
         description: 'Target branch'
         default: ''
