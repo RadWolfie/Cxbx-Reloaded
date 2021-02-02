@@ -21,4 +21,3 @@ jobs:
         upstream_repository: Cxbx-Reloaded/Cxbx-Reloaded
         upstream_branch: master
         target_branch: master
-        github_token: ${{ secrets.FORK_TOKEN }}
