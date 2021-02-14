@@ -1,6 +1,6 @@
 ---
 name: Test Case Report
-about: Create test case report from Cxbx-Reloaded
+about: Create test case report from Cxbx-Reloaded.
 title: 'TESTCASE: '
 labels: test-case-popup
 assignees: ''
