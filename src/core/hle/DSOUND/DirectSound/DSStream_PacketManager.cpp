@@ -298,6 +298,9 @@ bool DSStream_Packet_Process(
                     bool isStreamEnd = packetCurrent->isStreamEnd;
                     DSStream_Packet_Clear(packetCurrent, XMP_STATUS_SUCCESS, pThis->Xb_lpfnCallback, pThis->Xb_lpvContext, pThis);
 
+                    // TODO: Need to re-validate this process.
+                    //       Why? It may be possible to trigger end of stream/complete action even after callback called
+                    //       API process function to add another packet.
                     if (pThis->Host_BufferPacketArray.empty()) {
                         if (isStreamEnd) {
                             DSStream_Packet_Stop(pThis);
@@ -307,6 +310,13 @@ bool DSStream_Packet_Process(
                             DSStream_Packet_Starved(pThis);
                         }
                         return 0;
+                    }
+                    // Avoid exception if pointer is at the end.
+                    // TODO: How can we properly implement this check for above empty check process?
+                    //       Or is it possible title's XDK clear function do "empty", size == 1, check before clear function call?
+                    //       It may be the latter...
+                    if (packetCurrent == pThis->Host_BufferPacketArray.end()) {
+                        return 1; // Should we return 0 or 1?
                     }
 #if 0               // Extend debug verification
                     EmuLog(LOG_LEVEL::DEBUG, "nextBuffer: %08X; packetCurrent->bufPlayed: %08X; bufPlayed: %08X;\n",

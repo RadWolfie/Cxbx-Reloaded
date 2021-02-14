@@ -273,7 +273,7 @@ class X_CDirectSoundStream
         DWORD                                   EmuFlags;
         DWORD                                   X_BufferCacheSize; // Not really needed...
         DWORD                                   X_MaxAttachedPackets;
-        std::vector<struct host_voice_packet>   Host_BufferPacketArray;
+        std::list<struct host_voice_packet>     Host_BufferPacketArray;
         DWORD                                   Host_dwWriteOffsetNext;
         bool                                    Host_isProcessing;
         LPFNXMOCALLBACK                         Xb_lpfnCallback;
