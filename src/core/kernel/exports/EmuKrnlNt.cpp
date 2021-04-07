@@ -44,6 +44,7 @@ namespace NtDll
 #include "core\kernel\support\Emu.h" // For EmuLog(LOG_LEVEL::WARNING, )
 #include "core\kernel\support\EmuFile.h" // For EmuNtSymbolicLinkObject, NtStatusToString(), etc.
 #include "core\kernel\memory-manager\VMManager.h" // For g_VMManager
+#include "devices\Xbox.h"
 #include "CxbxDebugger.h"
 
 #pragma warning(disable:4005) // Ignore redefined status values
@@ -1629,6 +1630,16 @@ XBSYSAPI EXPORTNUM(219) xbox::ntstatus_xt NTAPI xbox::NtReadFile
 		CxbxDebugger::ReportFileRead(FileHandle, Length, Offset);
 	}
 
+	// If we are emulating the Chihiro, we need to hook mbcom
+	if (g_bIsChihiro && FileHandle == CHIHIRO_MBCOM_HANDLE) {
+		g_MediaBoard->ComRead(ByteOffset->QuadPart, Buffer, Length);
+
+		// Update the Status Block
+		IoStatusBlock->Status = STATUS_SUCCESS;
+		IoStatusBlock->Information = Length;
+		return STATUS_SUCCESS;
+	}
+
 	if (ApcRoutine != nullptr) {
 		// Pack the original parameters to a wrapped context for a custom APC routine
 		CxbxIoDispatcherContext* cxbxContext = new CxbxIoDispatcherContext(IoStatusBlock, ApcRoutine, ApcContext);
@@ -2154,6 +2165,16 @@ XBSYSAPI EXPORTNUM(236) xbox::ntstatus_xt NTAPI xbox::NtWriteFile
 			Offset = ByteOffset->QuadPart;
 		
 		CxbxDebugger::ReportFileWrite(FileHandle, Length, Offset);
+	}
+
+	// If we are emulating the Chihiro, we need to hook mbcom
+	if (g_bIsChihiro && FileHandle == CHIHIRO_MBCOM_HANDLE) {
+		g_MediaBoard->ComWrite(ByteOffset->QuadPart, Buffer, Length);
+
+		// Update the Status Block
+		IoStatusBlock->Status = STATUS_SUCCESS;
+		IoStatusBlock->Information = Length;
+		return STATUS_SUCCESS;
 	}
 
 	if (ApcRoutine != nullptr) {

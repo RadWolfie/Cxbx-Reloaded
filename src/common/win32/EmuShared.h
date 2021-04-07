@@ -86,7 +86,19 @@ class EmuShared : public Mutex
 		// * Check if parent process is emulating title
 		// ******************************************************************
 		void GetIsEmulating(bool *isEmulating) { Lock(); *isEmulating = m_bEmulating_status; Unlock(); }
-		void SetIsEmulating(const bool isEmulating) { Lock(); m_bEmulating_status = isEmulating; Unlock(); }
+		void SetIsEmulating(const bool isEmulating) {
+			Lock();
+			m_bEmulating_status = isEmulating;
+
+			// Clear MediaBoardMountPoint when we stop emulating
+			// This is required to prevent having to force-quit the emulator to change game
+			// while emulating the Chihiro.
+			if (!isEmulating) {
+				m_MediaBoardMountPoint[0] = 0;
+			}
+
+			Unlock();
+		}
 
 		// ******************************************************************
 		// * Each child process need to wait until parent process is ready
@@ -244,6 +256,12 @@ class EmuShared : public Mutex
 		void SetStorageLocation(const char *path) { Lock(); strncpy(m_core.szStorageLocation, path, MAX_PATH); Unlock(); }
 
 		// ******************************************************************
+		// * Media Board Mount Path (for Chihiro mbfs:)
+		// ******************************************************************
+		void GetMediaBoardMountPath(char *path) { Lock(); strncpy(path, m_MediaBoardMountPoint, MAX_PATH); Unlock(); }
+		void SetMediaBoardMountPath(const char *path) { Lock(); strncpy(m_MediaBoardMountPoint, path, MAX_PATH); Unlock(); }
+
+		// ******************************************************************
 		// * ClipCursor flag Accessors
 		// ******************************************************************
 		void GetClipCursorFlag(bool *value) { Lock(); *value = m_bClipCursor; Unlock(); }
@@ -341,7 +359,8 @@ class EmuShared : public Mutex
 		int          m_DeviceType[4];
 		char         m_DeviceControlNames[4][HIGHEST_NUM_BUTTONS][HOST_BUTTON_NAME_LENGTH];
 		char         m_DeviceName[4][50];
-		int          m_Reserved99[28]; // Reserve space
+		char         m_MediaBoardMountPoint[MAX_PATH];
+		int          m_Reserved99[32]; // Reserve space
 
 		// Settings class in memory should not be tampered by third-party.
 		// Third-party program should only be allow to edit settings.ini file.
