@@ -169,6 +169,7 @@ target_link_libraries(cxbxr-emu
  libtomcrypt
  SDL2
  imgui
+ mio::mio_min_winapi
 
  ${WINS_LIB}
 )

@@ -35,3 +35,7 @@
 	path = import/imgui
 	url = https://github.com/ocornut/imgui.git
 	shadow = true
+[submodule "import/mio"]
+	path = import/mio
+	url = https://github.com/mandreyel/mio.git
+	shadow = true
