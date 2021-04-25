@@ -370,7 +370,6 @@ void TriggerPendingConnectedInterrupts()
 		if (HalSystemInterrupts[i].IsPending() && EmuInterruptList[i] && EmuInterruptList[i]->Connected) {
 			HalSystemInterrupts[i].Trigger(EmuInterruptList[i]);
 		}
-		SwitchToThread();
 	}
 }
 
