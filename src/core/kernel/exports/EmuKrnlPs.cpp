@@ -401,22 +401,18 @@ XBSYSAPI EXPORTNUM(255) xbox::ntstatus_xt NTAPI xbox::PsCreateSystemThreadEx
 	// The ob handle of the ethread obj is the thread id we return to the title
 	result = ObInsertObject(eThread, zeroptr, 0, &eThread->UniqueThread);
 	if (X_NT_SUCCESS(result)) {
-		HANDLE dupHandle = OpenThread(THREAD_ALL_ACCESS, FALSE, hThreadId);
-		assert(dupHandle);
-		RegisterXboxHandle(eThread->UniqueThread, dupHandle);
-
 		if (g_iThreadNotificationCount) {
 			PspCallThreadNotificationRoutines(eThread, TRUE);
 		}
 
 		// Create another handle to pass back to the title in the ThreadHandle argument
 		result = ObOpenObjectByPointer(eThread, &PsThreadObjectType, ThreadHandle);
+		RegisterXboxObject(eThread, handle);
 	}
 
 	KeQuerySystemTime(&eThread->CreateTime);
 
 	if (X_NT_SUCCESS(result)) {
-		RegisterXboxHandle(*ThreadHandle, handle);
 
 		g_AffinityPolicy->SetAffinityXbox(handle);
 
