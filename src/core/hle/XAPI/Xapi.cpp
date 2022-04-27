@@ -982,7 +982,7 @@ xbox::LPVOID WINAPI xbox::EMUPATCH(ConvertThreadToFiber)
 	
 	RETURN(pRet);
 }
-	
+
 // ******************************************************************
 // * patch: SignalObjectAndWait
 // ******************************************************************
