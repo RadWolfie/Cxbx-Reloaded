@@ -49,6 +49,7 @@ namespace NtDll
 #include "core/kernel/support/NativeHandle.h" // For Xbox objects to native handle and back
 #include "core\kernel\memory-manager\VMManager.h" // For g_VMManager
 #include "core\kernel\support\NativeHandle.h"
+#include "devices\Xbox.h"
 #include "CxbxDebugger.h"
 
 #pragma warning(disable:4005) // Ignore redefined status values
@@ -1957,6 +1958,16 @@ XBSYSAPI EXPORTNUM(219) xbox::ntstatus_xt NTAPI xbox::NtReadFile
 		CxbxDebugger::ReportFileRead(FileHandle, Length, Offset);
 	}
 
+	// If we are emulating the Chihiro, we need to hook mbcom
+	if (g_bIsChihiro && FileHandle == CHIHIRO_MBCOM_HANDLE) {
+		g_MediaBoard->ComRead(ByteOffset->QuadPart, Buffer, Length);
+
+		// Update the Status Block
+		IoStatusBlock->Status = STATUS_SUCCESS;
+		IoStatusBlock->Information = Length;
+		return STATUS_SUCCESS;
+	}
+
 	PFILE_OBJECT FileObject;
 	ntstatus_xt result = ObReferenceObjectByHandle(FileHandle, &IoFileObjectType, reinterpret_cast<PVOID*>(&FileObject));
 	if (!X_NT_SUCCESS(result)) {
@@ -2751,6 +2762,16 @@ XBSYSAPI EXPORTNUM(236) xbox::ntstatus_xt NTAPI xbox::NtWriteFile
 			Offset = ByteOffset->QuadPart;
 		
 		CxbxDebugger::ReportFileWrite(FileHandle, Length, Offset);
+	}
+
+	// If we are emulating the Chihiro, we need to hook mbcom
+	if (g_bIsChihiro && FileHandle == CHIHIRO_MBCOM_HANDLE) {
+		g_MediaBoard->ComWrite(ByteOffset->QuadPart, Buffer, Length);
+
+		// Update the Status Block
+		IoStatusBlock->Status = STATUS_SUCCESS;
+		IoStatusBlock->Information = Length;
+		return STATUS_SUCCESS;
 	}
 
 	PFILE_OBJECT FileObject;

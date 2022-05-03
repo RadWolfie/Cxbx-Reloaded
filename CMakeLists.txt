@@ -22,6 +22,8 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/import/XbSymbolDatabase")
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/import/SDL2" EXCLUDE_FROM_ALL)
 
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/import/mio" EXCLUDE_FROM_ALL)
+
 # Cxbx-Reloaded projects
 set(CXBXR_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -203,6 +205,7 @@ file (GLOB CXBXR_HEADER_EMU
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuDisk.hpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuFile.h"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuFS.h"
+ "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuMediaBoard.hpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuMu.hpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuNtDll.h"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/NativeHandle.h"
@@ -362,6 +365,7 @@ file (GLOB CXBXR_SOURCE_EMU
  "${CXBXR_ROOT_DIR}/src/core/hle/DSOUND/common/XbInternalDSVoice.cpp"
  "${CXBXR_ROOT_DIR}/src/core/hle/DSOUND/common/XbInternalStruct.cpp"
  "${CXBXR_ROOT_DIR}/src/core/hle/Intercept.cpp"
+ "${CXBXR_ROOT_DIR}/src/core/hle/JVS/JVS.cpp"
  "${CXBXR_ROOT_DIR}/src/core/hle/Patches.cpp"
  "${CXBXR_ROOT_DIR}/src/core/hle/XACTENG/XactEng.cpp"
  "${CXBXR_ROOT_DIR}/src/core/hle/XGRAPHIC/XGraphic.cpp"
@@ -390,11 +394,14 @@ file (GLOB CXBXR_SOURCE_EMU
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuDisk.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuFile.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuFS.cpp"
+ "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuMediaBoard.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuMu.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/EmuNtDll.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/NativeHandle.cpp"
  "${CXBXR_ROOT_DIR}/src/core/kernel/support/PatchRdtsc.cpp"
  "${CXBXR_ROOT_DIR}/src/devices/ADM1032Device.cpp"
+ "${CXBXR_ROOT_DIR}/src/devices/Chihiro/JvsIO.cpp"
+ "${CXBXR_ROOT_DIR}/src/devices/Chihiro/MediaBoard.cpp"
  "${CXBXR_ROOT_DIR}/src/devices/EEPROMDevice.cpp"
  "${CXBXR_ROOT_DIR}/src/devices/network/NVNetDevice.cpp"
  "${CXBXR_ROOT_DIR}/src/devices/MCPXDevice.cpp"

@@ -1726,6 +1726,7 @@ KINTERRUPT_MODE;
 #define BCC_CXBXR_HARDDISK0 0x10000001
 #define BCC_CXBXR_CDROM0 0x10000002
 #define BCC_CXBXR_MU 0x10000003
+#define BCC_CXBXR_MEDIABOARD 0x10000004
 
 // ******************************************************************
 // * KINTERRUPR

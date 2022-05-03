@@ -39,3 +39,7 @@
 	path = import/libusb
 	url = https://github.com/libusb/libusb
 	shallow = true
+[submodule "import/mio"]
+	path = import/mio
+	url = https://github.com/mandreyel/mio.git
+	shadow = true
