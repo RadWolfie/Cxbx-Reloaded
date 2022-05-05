@@ -83,6 +83,7 @@ void MediaBoard::LpcWrite(uint32_t addr, uint32_t value, int size)
 
 void MediaBoard::ComRead(uint32_t offset, void* buffer, uint32_t length)
 {
+    Sleep(1);
 	// Copy the current read buffer to the output
 	memcpy(buffer, readBuffer, 0x20);
 }
@@ -90,7 +91,7 @@ void MediaBoard::ComRead(uint32_t offset, void* buffer, uint32_t length)
 void MediaBoard::ComWrite(uint32_t offset, void* buffer, uint32_t length)
 {
     // Instant replies cause race conditions, software seems to expect at least a little delay
-    Sleep(100);
+    Sleep(1);
 
     if (offset == 0x900000) { // Some kind of reset?
         memcpy(readBuffer, buffer, 0x20);

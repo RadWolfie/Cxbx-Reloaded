@@ -162,6 +162,7 @@ void JvsInputThread()
 		if (g_pPINSB != nullptr) {
 			*g_pPINSB = ChihiroBaseBoardState.GetPINSB();
 		}
+		Sleep(1);
 	}
 }
 
