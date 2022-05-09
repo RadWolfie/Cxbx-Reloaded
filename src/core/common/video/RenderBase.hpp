@@ -10,7 +10,7 @@
 
 #include "../imgui/ui.hpp"
 
-class RenderBase : public ImGuiUI
+class RenderBase : public ImGuiUI, private std::mutex
 {
 public:
 	RenderBase() = default;
@@ -18,6 +18,19 @@ public:
 
 	virtual bool Initialize();
 	virtual void Shutdown();
+
+	void Suspend()
+	{
+		lock();
+	};
+	inline void Lock()
+	{
+		lock();
+	}
+	inline void Unlock()
+	{
+		unlock();
+	}
 
 	template<class C, class T>
 	void Render(std::function<void(C, T)> callback, T arg)
@@ -50,6 +63,7 @@ protected:
 
 	std::function<void()> m_device_release;
 	std::function<void()> m_window_release;
+	std::mutex m_mtx;
 };
 
 extern std::unique_ptr<RenderBase> g_renderbase;

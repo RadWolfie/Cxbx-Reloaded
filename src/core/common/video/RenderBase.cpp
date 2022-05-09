@@ -27,6 +27,7 @@ bool RenderBase::Initialize()
 
 void RenderBase::Shutdown()
 {
+	unlock();
 	DeviceRelease();
 	m_device_release = std::function<void()>{};
 	WindowRelease();

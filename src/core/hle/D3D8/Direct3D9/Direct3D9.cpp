@@ -1073,7 +1073,6 @@ size_t GetXboxResourceSize(xbox::X_D3DResource* pXboxResource)
 		// Fallback to querying the allocation size, if no other calculation was present
 		return xbox::MmQueryAllocationSize(GetDataFromXboxResource(pXboxResource));
 	}
-	
 }
 
 bool HostResourceRequiresUpdate(resource_key_t key, xbox::X_D3DResource* pXboxResource, DWORD dwSize)
@@ -1124,7 +1123,7 @@ bool HostResourceRequiresUpdate(resource_key_t key, xbox::X_D3DResource* pXboxRe
 				it->second.hashLifeTime += 10ms;
 			}
 		}
-		
+
 		it->second.forceRehash = false;
 	}
 
@@ -3184,7 +3183,7 @@ xbox::hresult_xt WINAPI xbox::EMUPATCH(D3DDevice_Reset)
     // and we'll get a black screen.
 	FreeHostResource(GetHostResourceKey(g_pXbox_BackBufferSurface));
 	FreeHostResource(GetHostResourceKey(g_pXbox_DefaultDepthStencilSurface));
-	
+
 	// Call the Xbox Reset function to do the rest of the work for us
 	hresult_xt hRet = XB_TRMP(D3DDevice_Reset)(pPresentationParameters);
 
@@ -3221,7 +3220,7 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_GetDisplayFieldStatus)(X_D3DFIELD_
 		// We don't show a warning because doing so pollutes the kernel debug log as this function gets called every frame
 		displayMode.Flags = X_D3DPRESENTFLAG_INTERLACED;
 	}
-	
+
 	// Set the VBlank count
 	pFieldStatus->VBlankCount = g_Xbox_VBlankData.VBlank;
 
@@ -4782,7 +4781,7 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_Clear)
 			// TODO: D3DCLEAR_TARGET_A, *R, *G, *B don't exist on windows
 			if ((Flags & X_D3DCLEAR_TARGET) != X_D3DCLEAR_TARGET)
 				EmuLog(LOG_LEVEL::WARNING, "Unsupported : Partial D3DCLEAR_TARGET flag(s) for D3DDevice_Clear : 0x%.08X", Flags & X_D3DCLEAR_TARGET);
-		
+
 			HostFlags |= D3DCLEAR_TARGET;
 		}
 
@@ -5004,6 +5003,8 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
 {
 	LOG_FUNC_ONE_ARG(Flags);
 
+	g_renderbase->Lock();
+
 	// Handle swap flags
 	// We don't maintain a swap chain, and draw everything to backbuffer 0
 	// so just hack around the swap flags for now...
@@ -5030,6 +5031,7 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
 	if (Flags != X_D3DSWAP_DEFAULT && !(Flags & X_D3DSWAP_FINISH)) {
 		if (Flags == X_D3DSWAP_COPY) { LOG_TEST_CASE("X_D3DSWAP_COPY"); }
 		if (Flags == X_D3DSWAP_BYPASSCOPY) { LOG_TEST_CASE("X_D3DSWAP_BYPASSCOPY"); }
+		g_renderbase->Unlock();
 		return g_Xbox_SwapData.Swap;
 	}
 
@@ -5089,7 +5091,7 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
                 /* pDestRect = */ &dest,
                 /* Filter = */ LoadSurfaceFilter
             );
-		
+
 			if (hRet != D3D_OK) {
 				EmuLog(LOG_LEVEL::WARNING, "Couldn't blit Xbox BackBuffer to host BackBuffer : %X", hRet);
 			}
@@ -5327,9 +5329,7 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
 
 		if(g_pXbox_SwapCallback != xbox::zeroptr) 
 		{
-				
 			g_pXbox_SwapCallback(&g_Xbox_SwapData);
-				
 		}
 	}
 
@@ -5339,7 +5339,8 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
 	else
 		result = g_Xbox_SwapData.Swap; // Swap returns number of swaps
 
-    return result;
+	g_renderbase->Unlock();
+	return result;
 }
 
 bool IsSupportedFormat(xbox::X_D3DFORMAT X_Format, xbox::X_D3DRESOURCETYPE XboxResourceType, DWORD D3DUsage) {
@@ -6383,7 +6384,7 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_EnableOverlay)
 )
 {
 	LOG_FUNC_ONE_ARG(Enable);
-	
+
 	// The Xbox D3DDevice_EnableOverlay call merely resets the active
 	// NV2A overlay state, it doesn't actually enable or disable anything.
 	// Thus, we should just reset our overlay state here too. A title will
@@ -7925,6 +7926,8 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_DrawVerticesUP)
 		return;
 	}
 
+	g_renderbase->Lock();
+
 	// TODO : Call unpatched CDevice_SetStateUP();
 
 	CxbxUpdateNativeD3DResources();
@@ -7939,6 +7942,8 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_DrawVerticesUP)
 	CxbxDrawPrimitiveUP(DrawContext);
 
 	CxbxHandleXboxCallbacks();
+
+	g_renderbase->Unlock();
 }
 
 // LTCG specific D3DDevice_DrawVerticesUP function...
@@ -8971,7 +8976,7 @@ xbox::void_xt WINAPI xbox::EMUPATCH(CDevice_SetStateVB)(ulong_xt Unknown1 )
 	// TODO: Anything?
 //	__asm int 3;
 
-	LOG_UNIMPLEMENTED();	
+	LOG_UNIMPLEMENTED();
 }
 
 // ******************************************************************
@@ -8985,7 +8990,6 @@ xbox::void_xt WINAPI xbox::EMUPATCH(CDevice_SetStateUP)()
 
 	// TODO: Anything?
 //	__asm int 3;
-	
 }
 
 // ******************************************************************
@@ -9229,7 +9233,6 @@ xbox::void_xt WINAPI xbox::EMUPATCH(D3DDevice_SetRenderTargetFast)
 	LOG_FORWARD("D3DDevice_SetRenderTarget");
 
 	// Redirect to the standard version.
-	
 	EMUPATCH(D3DDevice_SetRenderTarget)(pRenderTarget, pNewZStencil);
 }
 

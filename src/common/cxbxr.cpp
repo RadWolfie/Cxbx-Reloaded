@@ -106,6 +106,11 @@ bool HandleFirstLaunch()
 
 #ifdef CXBXR_EMU
 	// This is very important process to prevent false positive report and allow IDEs to continue debug multiple reboots.
+
+	// Start suspend call(s) before we fully suspend threads in order to safely shutdown classes.
+	g_renderbase->Suspend();
+
+	// Start the suspension for all xbox threads.
 	CxbxrKrnlSuspendThreads();
 
 	if (g_io_mu_metadata) {
