@@ -184,6 +184,7 @@ static unsigned                     g_Xbox_Palette_Size[xbox::X_D3DTS_STAGECOUNT
 
        xbox::X_D3DBaseTexture       *g_pXbox_SetTexture[xbox::X_D3DTS_STAGECOUNT] = {0,0,0,0}; // Set by our D3DDevice_SetTexture and D3DDevice_SwitchTexture patches
 static xbox::X_D3DBaseTexture        CxbxActiveTextureCopies[xbox::X_D3DTS_STAGECOUNT] = {}; // Set by D3DDevice_SwitchTexture. Cached active texture
+static xbox::X_D3DPRESENT_PARAMETERS g_Xbox_PresentationParameters;
 
 xbox::X_D3DVIEWPORT8 g_Xbox_Viewport = { 0 };
 float g_Xbox_BackbufferScaleX = 1;
@@ -1595,6 +1596,63 @@ static DWORD WINAPI EmuRenderWindow(LPVOID lpParam)
     return 0;
 }
 
+extern void DrawInitialBlackScreen();
+extern void UpdateHostBackBufferDesc();
+extern void SetAspectRatioScale(const xbox::X_D3DPRESENT_PARAMETERS *param);
+
+void ResizeWindow(const HWND hWnd)
+{
+	if (!g_renderbase) {
+		return;
+	}
+	g_renderbase->Lock();
+	RECT lRect;
+	GetClientRect(hWnd, &lRect);
+
+	// Taken from D3D8's patched reset function.
+
+	//*
+	// Last known to work.
+	// Required:
+	g_EmuCDPD.HostPresentationParameters.BackBufferWidth = lRect.right - lRect.left;
+	g_EmuCDPD.HostPresentationParameters.BackBufferHeight = lRect.bottom - lRect.top;
+	UpdateHostBackBufferDesc();
+
+	/*
+	// TODO: Where to get this from?
+	xbox::X_D3DPRESENT_PARAMETERS param{};
+	//* Test #1
+	//param.BackBufferWidth = g_Xbox_Viewport.Width;
+	//param.BackBufferHeight = g_Xbox_Viewport.Height;
+	//* Test #2
+	param.BackBufferWidth = GetPixelContainerWidth(g_pXbox_RenderTarget);
+	param.BackBufferHeight = GetPixelContainerHeight(g_pXbox_RenderTarget);
+	// NOTE: Cannot use host's render target as it is used for upscaling purpose.
+	//param.Flags = g_Xbox_PresentationParameters.Flags;
+	SetAspectRatioScale(&param);
+	/*/
+	// Required:
+	SetAspectRatioScale(&g_Xbox_PresentationParameters);
+	//*/
+
+	FreeHostResource(GetHostResourceKey(g_pXbox_BackBufferSurface));
+	FreeHostResource(GetHostResourceKey(g_pXbox_DefaultDepthStencilSurface));
+	// Seems unaffected:
+	FreeHostResource(GetHostResourceKey(g_pXbox_RenderTarget));
+	FreeHostResource(GetHostResourceKey(g_pXbox_DepthStencil));
+
+	//xbox::EMUPATCH(D3DDevice_Reset)();
+	// Required:
+	g_pD3DDevice->Reset(&g_EmuCDPD.HostPresentationParameters);
+
+	// Refresh the current render target and depth stencil, to apply changes made within D3DDevice_Reset
+	// Some XDKs do this for us, but not all do!
+	// Required:
+	CxbxImpl_SetRenderTarget(g_pXbox_RenderTarget, g_pXbox_DepthStencil);
+
+	g_renderbase->Unlock();
+}
+
 // simple helper function
 void ToggleFauxFullscreen(HWND hWnd)
 {
@@ -1639,6 +1697,7 @@ void ToggleFauxFullscreen(HWND hWnd)
             SetFocus(hWnd);
         }
     }
+    ResizeWindow(hWnd);
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -1817,6 +1876,10 @@ static LRESULT WINAPI EmuMsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
                     if(g_XBVideo.bFullScreen)
                         CxbxrAbort(nullptr);
                 }
+                case SIZE_MAXHIDE:
+                break;
+                default:
+                    ResizeWindow(hWnd);
                 break;
             }
 
@@ -2154,6 +2217,9 @@ static void CreateDefaultD3D9Device
 )
 {
     LOG_INIT;
+
+	// Store presentation parameters for whenever window is resizing.
+	g_Xbox_PresentationParameters = *pPresentationParameters;
 
     // only one device should be created at once
     if (g_pD3DDevice != nullptr) {
@@ -3169,6 +3235,9 @@ xbox::hresult_xt WINAPI xbox::EMUPATCH(D3DDevice_Reset)
 
 	// Unlike the host version of Reset, The Xbox version does not actually reset the entire device
 	// Instead, it simply re-creates the backbuffer with a new configuration
+
+	// Store presentation parameters for whenever window is resizing.
+	g_Xbox_PresentationParameters = *pPresentationParameters;
 
 	// Store the new multisampling configuration
 	SetXboxMultiSampleType(pPresentationParameters->MultiSampleType);
