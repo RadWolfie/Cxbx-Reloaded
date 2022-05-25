@@ -970,6 +970,11 @@ xbox::ntstatus_xt NTAPI xbox::IopParseDevice(
 	// Force ShareAccess to all
 	OpenPacket->ShareAccess = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
 
+	// Force santion before call to NtDll::NtCreateFile
+	// Testcase:
+	//  * Exhibition Demo Disc - Attempt to create music folder fail internally which then will show unable to copy soundtrack dialog.
+	OpenPacket->FileAttributes &= FILE_ATTRIBUTE_VALID_FLAGS;
+
 	xbox::OBJECT_ATTRIBUTES ObjectAttributes;
 	ObjectAttributes.RootDirectory = RootDirectory;
 	ObjectAttributes.ObjectName = RemainingName;
