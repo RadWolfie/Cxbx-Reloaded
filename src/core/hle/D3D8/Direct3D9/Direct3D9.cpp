@@ -119,6 +119,7 @@ static UINT                         g_AspectRatioScaleWidth = 0;
 static UINT                         g_AspectRatioScaleHeight = 0;
 static D3DSURFACE_DESC              g_HostBackBufferDesc;
 static Settings::s_video            g_XBVideo;
+static bool                         g_bTriggerResize;
 
 // D3D based variables
 static IDirect3D9Ex                *g_pDirect3D = nullptr;
@@ -1600,14 +1601,14 @@ extern void DrawInitialBlackScreen();
 extern void UpdateHostBackBufferDesc();
 extern void SetAspectRatioScale(const xbox::X_D3DPRESENT_PARAMETERS *param);
 
-void ResizeWindow(const HWND hWnd)
+// NOTE: Can be only called within D3DDevice_Swap function.
+static void ResizeWindow()
 {
-	if (!g_renderbase) {
+	if (!g_hEmuWindow) {
 		return;
 	}
-	g_renderbase->Lock();
 	RECT lRect;
-	GetClientRect(hWnd, &lRect);
+	GetClientRect(g_hEmuWindow, &lRect);
 
 	// Taken from D3D8's patched reset function.
 
@@ -1650,7 +1651,7 @@ void ResizeWindow(const HWND hWnd)
 	// Required:
 	CxbxImpl_SetRenderTarget(g_pXbox_RenderTarget, g_pXbox_DepthStencil);
 
-	g_renderbase->Unlock();
+	g_bTriggerResize = false;
 }
 
 // simple helper function
@@ -1697,7 +1698,7 @@ void ToggleFauxFullscreen(HWND hWnd)
             SetFocus(hWnd);
         }
     }
-    ResizeWindow(hWnd);
+	g_bTriggerResize = true;
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -1876,10 +1877,12 @@ static LRESULT WINAPI EmuMsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
                     if(g_XBVideo.bFullScreen)
                         CxbxrAbort(nullptr);
                 }
+                [[fallthrough]];
                 case SIZE_MAXHIDE:
                 break;
                 default:
-                    ResizeWindow(hWnd);
+                    // Do not call ResizeWindow function, as the process require to be in same thread.
+                    g_bTriggerResize = true;
                 break;
             }
 
@@ -5102,6 +5105,10 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
 		if (Flags == X_D3DSWAP_BYPASSCOPY) { LOG_TEST_CASE("X_D3DSWAP_BYPASSCOPY"); }
 		g_renderbase->Unlock();
 		return g_Xbox_SwapData.Swap;
+	}
+
+	if (g_bTriggerResize) {
+		ResizeWindow();
 	}
 
 	// Fetch the host backbuffer
