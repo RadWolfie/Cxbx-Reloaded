@@ -137,6 +137,7 @@ static std::map<int, IDirect3DQuery*> g_HostVisibilityTestMap;
 static size_t                       g_QuadToTriangleHostIndexBuffer_Size = 0; // = NrOfQuadIndices
 static INDEX16                     *g_pQuadToTriangleIndexData = nullptr;
 static size_t                       g_QuadToTriangleIndexData_Size = 0; // = NrOfQuadIndices
+float g_d3d_targetRefreshRate = 60;
 
 struct {
 	xbox::X_D3DSurface Surface;
@@ -1912,6 +1913,8 @@ static LRESULT WINAPI EmuMsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPar
     return S_OK; // = Is not part of D3D8 handling.
 }
 
+std::chrono::duration<double, std::milli> g_vblank_target_period = 16.6666666667ms;
+
 std::chrono::steady_clock::time_point GetNextVBlankTime()
 {
 	using namespace std::chrono;
@@ -1921,8 +1924,7 @@ std::chrono::steady_clock::time_point GetNextVBlankTime()
 	// This will require at least Direct3D_CreateDevice being unpatched
 	// otherwise, m_CurrentAvInfo will never be initialised!
 	// 20ms should be used in the case of 50hz
-	auto ms = 16.6666666667ms;
-	return steady_clock::now() + duration_cast<steady_clock::duration>(ms);
+	return steady_clock::now() + duration_cast<steady_clock::duration>(g_vblank_target_period);
 }
 
 // timing thread procedure
@@ -2023,6 +2025,23 @@ static void SetupPresentationParameters
 
     params.PresentationInterval = g_XBVideo.bVSync ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
     g_Xbox_PresentationInterval_Default = pXboxPresentationParameters->PresentationInterval;
+
+	extern void CxbxrSetRefreshRateMode(xbox::ulong_xt Mode);
+	xbox::ulong_xt DisplayMode = 0;
+	if (pXboxPresentationParameters->FullScreen_RefreshRateInHz == 50) {
+		DisplayMode = 0x40000000;// AV_MODE_OUT_525SDTV
+	}
+	else if (pXboxPresentationParameters->FullScreen_RefreshRateInHz == 0) {
+		static xbox::ulong_xt curAvInfo = 0;
+		if (!curAvInfo) {
+			xbox::AvSendTVEncoderOption(xbox::zeroptr, AV_QUERY_AV_CAPABILITIES, 0, &curAvInfo);
+		}
+		if (curAvInfo & AV_FLAGS_50Hz) {
+			DisplayMode = 0x40000000;// AV_MODE_OUT_525SDTV
+		}
+	}
+	CxbxrSetRefreshRateMode(DisplayMode);
+
 
     // We only want *one* backbuffer on the host, triple buffering, etc should be handled by our Present/Swap impl
     params.BackBufferCount = 1;
@@ -3188,6 +3207,22 @@ static void CxbxImpl_Reset(xbox::X_D3DPRESENT_PARAMETERS* pPresentationParameter
 	// and we'll get a black screen.
 	FreeHostResource(GetHostResourceKey(g_pXbox_BackBufferSurface));
 	FreeHostResource(GetHostResourceKey(g_pXbox_DefaultDepthStencilSurface));
+
+	extern void CxbxrSetRefreshRateMode(xbox::ulong_xt Mode);
+	xbox::ulong_xt DisplayMode = 0;
+	if (pPresentationParameters->FullScreen_RefreshRateInHz == 50) {
+		DisplayMode = 0x40000000;// AV_MODE_OUT_525SDTV
+	}
+	else if (pPresentationParameters->FullScreen_RefreshRateInHz == 0) {
+		static xbox::ulong_xt curAvInfo = 0;
+		if (!curAvInfo) {
+			xbox::AvSendTVEncoderOption(xbox::zeroptr, AV_QUERY_AV_CAPABILITIES, 0, &curAvInfo);
+		}
+		if (curAvInfo & AV_FLAGS_50Hz) {
+			DisplayMode = 0x40000000;// AV_MODE_OUT_525SDTV
+		}
+	}
+	CxbxrSetRefreshRateMode(DisplayMode);
 
 	// Below requirement for patched function(s) in order to function properly.
 	// Perform xbox's D3DDevice_Reset call.
@@ -5353,8 +5388,6 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
     if ((presentationInverval != D3DPRESENT_INTERVAL_IMMEDIATE) && !g_bHack_UnlockFramerate) {
         // If the last frame completed faster than the Xbox target swap rate, wait for it
 
-        auto targetRefreshRate = 60.0f; // TODO: Read from Xbox Display Mode
-
         // Determine how many 'frames' worth of time we need to wait for
         // This allows games that require a locked framerate (eg JSRF) to function correctly
         // While allowing titles with an unlocked frame-rate to not be limited
@@ -5377,7 +5410,7 @@ xbox::dword_xt WINAPI xbox::EMUPATCH(D3DDevice_Swap)
         }
 
         // Wait until it's time for the next frame
-        auto frameMs = (1000.0 / targetRefreshRate) * multiplier;
+        auto frameMs = (1000.0 / g_d3d_targetRefreshRate) * multiplier;
         auto targetDuration = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double, std::milli>(frameMs));
         auto targetTimestamp = frameStartTime + targetDuration;
         SleepPrecise(targetTimestamp);

@@ -243,6 +243,27 @@ XBSYSAPI EXPORTNUM(2) xbox::void_xt NTAPI xbox::AvSendTVEncoderOption
 	}
 }
 
+// Below externs are necessary to use inside AvSetDisplayMode call to
+// update the timings.
+extern std::chrono::duration<double, std::milli> g_vblank_target_period;
+extern float g_d3d_targetRefreshRate;
+void CxbxrSetRefreshRateMode(xbox::ulong_xt Mode)
+{
+	using namespace std::chrono;
+	// Check if PAL 50Hz flag is set
+	if (Mode & AV_MODE_OUT_525SDTV) {
+		g_vblank_target_period = 20ms;
+		g_d3d_targetRefreshRate = 50.0f;
+		printf("\n\nPAL MODE!\n\n");
+	}
+	// Otherwise 60Hz should be use by default.
+	else {
+		g_vblank_target_period = 16.6666666667ms;
+		g_d3d_targetRefreshRate = 60.0f;
+		printf("\n\nNTSC MODE!\n\n");
+	}
+}
+
 // ******************************************************************
 // * 0x0003 - AvSetDisplayMode()
 // ******************************************************************
@@ -388,6 +409,8 @@ XBSYSAPI EXPORTNUM(3) xbox::ulong_xt NTAPI xbox::AvSetDisplayMode
 
 	REG_WR32(RegisterBase, NV_PCRTC_START, FrameBuffer);
 	AvpCurrentMode = Mode;
+
+	CxbxrSetRefreshRateMode(AvpCurrentMode);
 
 	RETURN(X_STATUS_SUCCESS);
 }
