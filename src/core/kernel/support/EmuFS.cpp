@@ -512,6 +512,20 @@ __declspec(naked) void EmuFS_MovFs00Esp()
 	}
 }
 
+__declspec(naked) void EmuFS_MovFs58Eax()
+{
+	// Note : ebx must be preserved here, hence the push/pop
+	__asm
+	{
+		call EmuFS_RefreshKPCR
+		push ebx
+		mov ebx, fs : [TIB_ArbitraryDataSlot]
+		mov [ebx + 0x58], eax
+		pop ebx
+		ret
+	}
+}
+
 __declspec(naked) void EmuFS_PushDwordPtrFs00()
 {
 	static uint32_t returnAddr;
@@ -585,7 +599,8 @@ void EmuInitFS()
 	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA1, 0x20, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovEaxFs20 });					// mov eax, large fs:20
 	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA1, 0x28, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovEaxFs28 });					// mov eax, large fs:28
 	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA1, 0x58, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovEaxFs58 });					// mov eax, large fs:58
-	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA3, 0x00, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovFs00Eax });					// mov large fs:0, eax 
+	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA3, 0x00, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovFs00Eax });					// mov large fs:0, eax
+	fsInstructions.push_back(fs_instruction_t { { 0x64, 0xA3, 0x58, 0x00, 0x00, 0x00 }, (void*)&EmuFS_MovFs58Eax });					// mov large fs:58, eax
 	EmuLogEx(CXBXR_MODULE::INIT, LOG_LEVEL::DEBUG, "Patching FS Register Accesses\n");
 	DWORD sizeOfImage = CxbxKrnl_XbeHeader->dwSizeofImage;
 	long numberOfInstructions = fsInstructions.size();
