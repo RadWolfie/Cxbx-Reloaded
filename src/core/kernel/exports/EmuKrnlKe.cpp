@@ -521,7 +521,7 @@ void InitDpcData()
 
 bool IsDpcActive()
 {
-	return g_DpcData.IsDpcActive.test();
+	return g_DpcData.IsDpcActive.test() || KeGetCurrentPrcb()->DpcRoutineActive;
 }
 
 static constexpr uint32_t XBOX_TSC_FREQUENCY = 733333333; // Xbox Time Stamp Counter Frequency = 733333333 (CPU Clock)
@@ -1266,8 +1266,8 @@ XBSYSAPI EXPORTNUM(119) xbox::boolean_xt NTAPI xbox::KeInsertQueueDpc
 		LOG_FUNC_END;
 
 	// For thread safety, enter the Dpc lock:
+	KIRQL OldIrql = KfRaiseIrql(HIGH_LEVEL);
 	EnterCriticalSection(&(g_DpcData.Lock));
-	// TODO : Instead, disable interrupts - use KeRaiseIrql(HIGH_LEVEL, &(KIRQL)OldIrql) ?
 
 	BOOLEAN NeedsInsertion = (Dpc->Inserted == FALSE);
 
@@ -1279,7 +1279,9 @@ XBSYSAPI EXPORTNUM(119) xbox::boolean_xt NTAPI xbox::KeInsertQueueDpc
 		InsertTailList(&(g_DpcData.DpcQueue), &(Dpc->DpcListEntry));
 		LeaveCriticalSection(&(g_DpcData.Lock));
 		g_DpcData.IsDpcPending.test_and_set();
-		g_DpcData.IsDpcPending.notify_one();
+		// NOTE: DPC thread cannot be notified from here. According to xkts test, it is too early to start and a happy trigger.
+		//       With below commented out, titles will boot into deadlock. Maybe emu HW side issue?
+		//g_DpcData.IsDpcPending.notify_one();
 
 		// TODO : Instead of DpcQueue, add the DPC to KeGetCurrentPrcb()->DpcListHead
 		// Signal the Dpc handling code there's work to do
@@ -1296,7 +1298,7 @@ XBSYSAPI EXPORTNUM(119) xbox::boolean_xt NTAPI xbox::KeInsertQueueDpc
 	}
 
 	// Thread-safety is no longer required anymore
-	// TODO : Instead, enable interrupts - use KeLowerIrql(OldIrql) ?
+	KfLowerIrql(OldIrql);
 
 	RETURN(NeedsInsertion);
 }
