@@ -178,7 +178,7 @@ void JVS_Init()
 	std::string baseBoardBackupRamPath = "backup_ram.bin";
 
 	if (!JVS_LoadFile((romPath + "\\" + baseBoardQcFirmwarePath).c_str(), g_BaseBoardQcFirmware)) {
-		("Failed to load base board firmware: %s", baseBoardQcFirmwarePath.c_str());
+		CxbxrAbort("Failed to load base board firmware: %s", baseBoardQcFirmwarePath.c_str());
 	}
 
 	if (!JVS_LoadFile((romPath + "\\" + baseBoardScFirmwarePath).c_str(), g_BaseBoardScFirmware)) {

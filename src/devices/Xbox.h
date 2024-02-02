@@ -54,7 +54,9 @@ typedef enum {
 	Revision1_4,
 	Revision1_5,
 	Revision1_6,
-	DebugKit
+	DebugKit,
+	Chihiro_Type1,
+	Chihiro_Type3,
 } HardwareModel;
 
 typedef enum { // TODO : Move to it's own file

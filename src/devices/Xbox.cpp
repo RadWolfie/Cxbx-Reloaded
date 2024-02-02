@@ -27,6 +27,7 @@
 
 #include "Xbox.h" // For HardwareModel
 #include "common\xbe\Xbe.h"  // Without this HLEIntercept complains about some undefined xbe variables
+#include "core\kernel\common\xbox.h"
 #include "core\hle\Intercept.hpp"
 #include "EmuShared.h"
 
@@ -53,7 +54,8 @@ MCPXRevision MCPXRevisionFromHardwareModel(HardwareModel hardwareModel)
 	case Revision1_6:
 		return MCPXRevision::MCPX_X3;
 	case DebugKit:
-		// EmuLog(LOG_LEVEL::WARNING, "Guessing MCPXVersion");
+	case Chihiro_Type1:
+	case Chihiro_Type3:
 		return MCPXRevision::MCPX_X2;
 	default:
 		// UNREACHABLE(hardwareModel);
@@ -67,15 +69,21 @@ SCMRevision SCMRevisionFromHardwareModel(HardwareModel hardwareModel)
 	case Revision1_0:
 		return SCMRevision::P01; // Our SCM returns PIC version string "P01"
 	case Revision1_1:
+		return SCMRevision::P05;
 	case Revision1_2:
 	case Revision1_3:
 	case Revision1_4:
+		return SCMRevision::P11;
 	case Revision1_5:
 	case Revision1_6:
 		// EmuLog(LOG_LEVEL::WARNING, "Guessing SCMRevision");
 		return SCMRevision::P2L; // Assumption; Our SCM returns PIC version string "P05"
 	case DebugKit:
 		return SCMRevision::D01; // Our SCM returns PIC version string "DXB"
+	case Chihiro_Type1:
+		return SCMRevision::D05;
+	case Chihiro_Type3:
+		return SCMRevision::B11;
 	default:
 		// UNREACHABLE(hardwareModel);
 		return SCMRevision::P2L;
@@ -99,6 +107,8 @@ TVEncoder TVEncoderFromHardwareModel(HardwareModel hardwareModel)
 	case DebugKit:
 		// LukeUsher : My debug kit and at least most of them (maybe all?)
 		// are equivalent to v1.0 and have Conexant encoders.
+	case Chihiro_Type1:
+	case Chihiro_Type3:
 		return TVEncoder::Conexant;
 	default: 
 		// UNREACHABLE(hardwareModel);
@@ -133,7 +143,14 @@ void InitXboxHardware(HardwareModel hardwareModel)
 		g_USB0 = new USBDevice();
 	}
 
+	// TODO: Use hardwareModel check instead
+	if (g_bIsDevKit) {
+		xbox::XboxHardwareInfo.Flags |= XBOX_HW_FLAG_DEVKIT_KERNEL;
+	}
+
+	// TODO: Use hardwareModel check instead
 	if (g_bIsChihiro) {
+        xbox::XboxHardwareInfo.Flags |= XBOX_HW_FLAG_ARCADE;
         g_MediaBoard = new MediaBoard();
         char MediaBoardMountPath[xbox::max_path];
         g_EmuShared->GetTitleMountPath(MediaBoardMountPath);

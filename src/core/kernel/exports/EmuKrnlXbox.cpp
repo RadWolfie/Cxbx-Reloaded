@@ -41,6 +41,7 @@ XBSYSAPI EXPORTNUM(321) xbox::XBOX_KEY_DATA xbox::XboxEEPROMKey = { 0 };
 // ******************************************************************
 // * 0x0142 - XboxHardwareInfo
 // ******************************************************************
+// TODO: Initialize as zero'd, then set the values dynamically in core's relative devices.
 XBSYSAPI EXPORTNUM(322) xbox::XBOX_HARDWARE_INFO xbox::XboxHardwareInfo =
 {
 	0xC0000031, // Flags: 1=INTERNAL_USB, 2=DEVKIT, 4=MACROVISION, 8=CHIHIRO

@@ -63,6 +63,7 @@ uint32_t MediaBoard::LpcRead(uint32_t addr, int size)
 		case 0x4020: return 0x00A0;     // XBAM String (SEGABOOT reports Media Board is not present if these values change)
 		case 0x4022: return 0x4258;     // Continued
 		case 0x4024: return 0x4D41;     // Continued
+		// TODO: Find a way to make the switch between Type-1 and Type-3 (internal value holder maybe?)
 		case 0x40F0: return 0x0000;     // Media Board Type (Type-1 vs Type-3), 0x0000 = Type-1, 0x0100 = Type-3
 		case 0x40F4: return 0x03;       // 1GB
 	}
