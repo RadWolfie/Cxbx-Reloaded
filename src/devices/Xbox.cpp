@@ -167,7 +167,7 @@ void InitXboxHardware(HardwareModel hardwareModel)
 		g_USB0 = new USBDevice();
 	}
 
-	if (g_bIsChihiro) {
+	if (IS_CHIHIRO(hardwareModel)) {
         g_MediaBoard = new MediaBoard();
         char MediaBoardMountPath[xbox::max_path];
         g_EmuShared->GetTitleMountPath(MediaBoardMountPath);
